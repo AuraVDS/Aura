@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura Cloud OS</title>
+    <title>Aura Absolute</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg: #000000;
             --surface: #0c0c0d;
-            --card: #151517;
+            --card: #141415;
             --accent: #ffffff;
             --border: #1f1f21;
-            --dim: #7a7a7a;
+            --dim: #636366;
             --green: #00ffa3;
         }
 
@@ -25,166 +25,165 @@
             overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .app-wrapper {
+        .app-container {
             flex: 1; padding: 20px;
-            padding-top: calc(20px + env(safe-area-inset-top));
+            padding-top: calc(15px + env(safe-area-inset-top));
             display: flex; flex-direction: column;
             overflow: hidden;
         }
 
-        /* Header */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .logo { font-size: 22px; font-weight: 800; letter-spacing: 5px; background: linear-gradient(180deg, #fff, #555); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .lang-pill { font-size: 10px; border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; color: var(--dim); font-weight: 600; }
-
-        /* Views */
-        .view { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease-out; }
-        .view.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
-        /* Balance Card */
-        .premium-card {
-            background: linear-gradient(145deg, #111, #050505);
-            border: 1px solid var(--border); border-radius: 28px;
-            padding: 30px 20px; text-align: center; margin-bottom: 20px;
-            transition: 0.3s;
+        /* --- UI ELEMENTS --- */
+        .balance-bar {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; transition: 0.3s;
         }
-        .premium-card:active { transform: scale(0.98); border-color: var(--dim); }
-        .bal-val { font-size: 40px; font-weight: 700; margin: 8px 0; letter-spacing: -1px; }
-        .bal-sub { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; }
+        .balance-bar:active { transform: scale(0.98); background: #111; }
+        .bal-info span { display: block; }
+        .bal-t { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+        .bal-v { font-size: 20px; font-weight: 700; }
+
+        /* Central Pulse Logo */
+        .hero-section {
+            flex: 1; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; gap: 20px;
+        }
+        .pulse-logo {
+            font-size: 32px; font-weight: 900; letter-spacing: 12px;
+            text-indent: 12px; position: relative;
+            animation: aura-breath 4s infinite ease-in-out;
+        }
+        @keyframes aura-breath {
+            0%, 100% { opacity: 0.4; transform: scale(0.98); filter: blur(1px); }
+            50% { opacity: 1; transform: scale(1.05); filter: blur(0px); }
+        }
 
         /* Config Grid */
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .tile {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 22px; padding: 18px; display: flex; flex-direction: column;
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: auto; }
+        .node {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 22px; padding: 18px; transition: 0.2s;
         }
-        .tile:active { background: #111; border-color: var(--accent); }
-        .t-label { font-size: 9px; color: var(--dim); text-transform: uppercase; font-weight: 700; }
-        .t-val { font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .node:active { border-color: var(--dim); transform: translateY(-2px); }
+        .n-l { font-size: 9px; color: var(--dim); text-transform: uppercase; font-weight: 700; }
+        .n-v { font-size: 13px; font-weight: 600; margin-top: 4px; }
 
-        /* Info Center */
-        .info-box {
-            background: rgba(255,255,255,0.03); border-radius: 20px; padding: 18px;
-            font-size: 12px; line-height: 1.6; color: var(--dim); border-left: 3px solid var(--accent);
-            margin-bottom: 20px;
-        }
+        /* --- VIEWS --- */
+        .view { display: none; flex-direction: column; height: 100%; }
+        .view.active { display: flex; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Server List */
-        .server-card {
+        /* Servers List */
+        .s-item {
             background: var(--surface); border: 1px solid var(--border);
-            border-radius: 22px; padding: 18px; margin-bottom: 12px;
+            border-radius: 20px; padding: 18px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .s-status { font-size: 9px; padding: 4px 10px; border-radius: 12px; background: rgba(0,255,163,0.1); color: var(--green); font-weight: 800; }
+        .s-price { font-size: 13px; font-weight: 700; color: var(--green); }
 
-        /* Tab Bar */
+        /* --- NAVIGATION --- */
         nav {
-            background: rgba(10, 10, 11, 0.96); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-around;
+            background: rgba(10, 10, 11, 0.98); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border); display: flex;
             padding: 15px 0 calc(15px + env(safe-area-inset-bottom));
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; }
-        .nav-item.active { opacity: 1; color: var(--accent); }
-        .nav-ico { font-size: 22px; }
-        .nav-lbl { font-size: 10px; font-weight: 700; margin-top: 5px; }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; }
+        .nav-link.active { opacity: 1; }
+        .nav-ico { font-size: 20px; }
+        .nav-txt { font-size: 9px; font-weight: 700; margin-top: 5px; text-transform: uppercase; }
 
-        /* Overlay & Modals */
-        .overlay {
+        /* --- MODALS --- */
+        .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
-            display: none; justify-content: center; align-items: flex-end; z-index: 2000;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            display: none; justify-content: center; align-items: flex-end; z-index: 9999;
         }
         .sheet {
             background: #0d0d0f; width: 100%; border-radius: 35px 35px 0 0;
-            padding: 45px 25px 50px; border-top: 1px solid var(--border);
-            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 40px 25px; border-top: 1px solid var(--border);
+            transform: translateY(100%); transition: 0.4s cubic-bezier(0.1, 0.9, 0.1, 1);
         }
-        .sheet.active { transform: translateY(0); }
+        .sheet.up { transform: translateY(0); }
         .opt {
-            background: var(--surface); padding: 22px; border-radius: 20px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; border: 1px solid var(--border); font-weight: 600;
+            background: var(--card); padding: 22px; border-radius: 20px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; border: 1px solid var(--border);
         }
-        .opt:active { background: #1a1a1c; border-color: var(--dim); }
+        .opt:active { background: #1a1a1c; }
 
-        .main-btn {
-            background: var(--accent); color: #000; border: none; padding: 22px;
-            border-radius: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; width: 100%;
-            transition: 0.2s;
+        .btn-main {
+            background: var(--accent); color: #000; border: none; padding: 20px;
+            border-radius: 22px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 2px; width: 100%; margin-top: 20px;
         }
-        .main-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
 
-    <div class="app-wrapper">
-        <header>
-            <div class="logo">AURA</div>
-            <div class="lang-pill" onclick="tg.HapticFeedback.impactOccurred('rigid')">RU</div>
-        </header>
-
-        <div id="view-home" class="view active">
-            <div class="premium-card" onclick="openMod('bill')">
-                <div class="bal-sub">Лимит ресурсов</div>
-                <div class="bal-val">0.00 €</div>
-                <div style="font-size: 10px; color: var(--green); font-weight: 800;">● СИСТЕМА АКТИВНА</div>
+    <div class="app-container">
+        <div class="balance-bar" onclick="openM('billing')">
+            <div class="bal-info">
+                <span class="bal-t">Кошелек Aura</span>
+                <span class="bal-v">0.00 €</span>
             </div>
-            
-            <div class="config-grid">
-                <div class="tile" onclick="openMod('loc')"><span class="t-label">Локация</span><span class="t-val" id="v-loc">Германия</span></div>
-                <div class="tile" onclick="openMod('os')"><span class="t-label">Система</span><span class="t-val" id="v-os">Windows Server</span></div>
-                <div class="tile" onclick="openMod('cpu')"><span class="t-label">Мощность</span><span class="t-val" id="v-cpu">4 vCPU</span></div>
-                <div class="tile" onclick="openMod('ram')"><span class="t-label">RAM</span><span class="t-val" id="v-ram">8 GB</span></div>
-            </div>
-
-            <div class="info-box">
-                <b>Aura VDS</b> — ваш личный компьютер в облаке. 
-                Используйте его для трейдинга, софта или VPN. 
-                Никаких пауз, доступ 24/7 с любого устройства.
-            </div>
-            
-            <button class="main-btn" style="margin-top: auto;" onclick="deploy()">Развернуть VDS</button>
+            <div style="font-size: 18px;">⊕</div>
         </div>
 
-        <div id="view-list" class="view">
-            <h3 style="margin-bottom:20px; font-size:24px;">Мои сервера</h3>
-            <div class="server-card">
+        <div id="v-home" class="view active">
+            <div class="hero-section">
+                <div class="pulse-logo">AURA</div>
+                <div style="font-size: 10px; color: var(--dim); letter-spacing: 4px;">QUANTUM CLOUD</div>
+            </div>
+            
+            <div class="grid">
+                <div class="node" onclick="openM('loc')"><div class="n-l">Регион</div><div class="n-v" id="res-loc">Germany</div></div>
+                <div class="node" onclick="openM('os')"><div class="n-l">Система</div><div class="n-v" id="res-os">Ubuntu 24.04</div></div>
+                <div class="node" onclick="openM('cpu')"><div class="n-l">Ядра</div><div class="n-v" id="res-cpu">4 vCPU</div></div>
+                <div class="node" onclick="openM('ram')"><div class="n-l">Память</div><div class="n-v" id="res-ram">8 GB</div></div>
+            </div>
+            <button class="btn-main" onclick="tg.showConfirm('Инициализировать создание сервера?')">Создать сервер</button>
+        </div>
+
+        <div id="v-list" class="view">
+            <h2 style="margin-bottom: 20px;">Мои Сервера</h2>
+            <div class="s-item">
                 <div>
-                    <div style="font-weight:800; font-size:16px;">Aura-Node-Alpha</div>
-                    <div style="font-size:11px; color:var(--dim); margin-top:4px;">4 vCPU / 8GB / Frankfurt</div>
+                    <div style="font-weight:700">Aura-Node-01</div>
+                    <div style="font-size:10px; color:var(--dim)">Ubuntu / 4 CPU / Frankfurt</div>
                 </div>
-                <div style="text-align:right">
-                    <div class="s-status">Active</div>
-                    <div style="font-size:13px; font-weight:700; margin-top:6px;">€14.00/мес</div>
-                </div>
+                <div class="s-price">€14.00</div>
             </div>
-            <p style="color:var(--dim); font-size:12px; text-align:center; margin-top:30px;">Другие активные узлы не обнаружены</p>
+            <div class="s-item" style="opacity: 0.5;">
+                <div>
+                    <div style="font-weight:700">Aura-Backup-ST</div>
+                    <div style="font-size:10px; color:var(--dim)">Debian / 2 CPU / Helsinki</div>
+                </div>
+                <div class="s-price">€8.50</div>
+            </div>
         </div>
 
-        <div id="view-settings" class="view">
-            <h3 style="margin-bottom:20px; font-size:24px;">Настройки</h3>
-            <div class="tile" style="margin-bottom:12px;"><span class="t-label">Профиль</span><span class="t-val">Danil Zaslavsky</span></div>
-            <div class="tile" style="margin-bottom:12px;"><span class="t-label">Интерфейс</span><span class="t-val">Русский (Default)</span></div>
-            <div class="tile" style="margin-bottom:12px;"><span class="t-label">Безопасность</span><span class="t-val">Шифрование AES-256</span></div>
-            <div class="tile" style="margin-bottom:12px;"><span class="t-label">Поддержка</span><span class="t-val">Aura Support Bot</span></div>
+        <div id="v-set" class="view">
+            <h2 style="margin-bottom: 20px;">Опции</h2>
+            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Аккаунт</div><div class="n-v">Danil Zaslavsky</div></div>
+            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Язык системы</div><div class="n-v">Русский (RU)</div></div>
+            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Версия ПО</div><div class="n-v">Aura Absolute v3.1</div></div>
+            <div style="margin-top:20px; font-size:12px; color:var(--dim); line-height:1.6;">
+                <b>VDS</b> — это выделенный ресурс, который работает только на вас. 
+                В отличие от обычного хостинга, здесь вся мощность процессора и RAM зарезервирована за вами. 
+                Идеально для ботов, трейдинга и безопасного серфинга.
+            </div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchView('home', this)">
-            <span class="nav-ico">◈</span><span class="nav-lbl">Главная</span>
-        </div>
-        <div class="nav-item" onclick="switchView('list', this)">
-            <span class="nav-ico">▣</span><span class="nav-lbl">Серверы</span>
-        </div>
-        <div class="nav-item" onclick="switchView('settings', this)">
-            <span class="nav-ico">⚙</span><span class="nav-lbl">Опции</span>
-        </div>
+        <div class="nav-link active" onclick="tab('home', this)"><span class="nav-ico">◈</span><span class="nav-txt">Aura</span></div>
+        <div class="nav-link" onclick="tab('list', this)"><span class="nav-ico">▣</span><span class="nav-txt">Узлы</span></div>
+        <div class="nav-link" onclick="tab('set', this)"><span class="nav-ico">⚙</span><span class="nav-txt">Инфо</span></div>
     </nav>
 
-    <div class="overlay" id="overlay" onclick="closeMod()">
+    <div class="modal" id="modal" onclick="closeM()">
         <div class="sheet" id="sheet" onclick="event.stopPropagation()">
-            <div id="m-content"></div>
+            <div id="m-body"></div>
         </div>
     </div>
 
@@ -193,49 +192,44 @@
         tg.expand();
         tg.setHeaderColor('#000000');
 
-        const db = {
+        const data = {
             loc: { t: 'Локация', o: ['Германия (€0)', 'Финляндия (€0)', 'США (€2)'] },
-            os: { t: 'Операционная система', o: ['Windows Server 2022', 'Ubuntu 24.04', 'Debian 12'] },
-            cpu: { t: 'Конфигурация CPU', o: ['2 vCPU (€8)', '4 vCPU (€14)', '8 vCPU (€28)'] },
-            ram: { t: 'Оперативная память', o: ['4 GB', '8 GB', '16 GB'] },
-            bill: { t: 'Метод пополнения', o: ['💳 Банковская карта', '💎 USDT / Crypto', '🔗 P2P Перевод'] }
+            os: { t: 'ОС Сервера', o: ['Ubuntu 24.04', 'Windows Server', 'Debian 12'] },
+            cpu: { t: 'Мощность CPU', o: ['2 Cores (€8)', '4 Cores (€14)', '8 Cores (€28)'] },
+            ram: { t: 'Память RAM', o: ['4 GB', '8 GB', '16 GB'] },
+            billing: { t: 'Пополнение', o: ['💳 Карты РФ/Мир', '💎 Crypto (USDT)', '🔗 P2P Перевод'] }
         };
 
-        function switchView(id, el) {
+        function tab(id, el) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById('v-' + id).classList.add('active');
             el.classList.add('active');
         }
 
-        function openMod(id) {
-            const d = db[id];
+        function openM(id) {
+            const d = data[id];
             tg.HapticFeedback.impactOccurred('medium');
-            let h = `<div style="text-align:center; font-weight:800; margin-bottom:30px; font-size:22px; letter-spacing:-0.5px;">${d.t}</div>`;
+            let h = `<div style="text-align:center; font-weight:800; margin-bottom:30px; font-size:22px;">${d.t}</div>`;
             d.o.forEach(o => {
-                h += `<div class="opt" onclick="set('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
+                h += `<div class="opt" onclick="apply('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
             });
-            document.getElementById('m-content').innerHTML = h;
-            document.getElementById('overlay').style.display = 'flex';
-            setTimeout(() => document.getElementById('sheet').classList.add('active'), 10);
+            document.getElementById('m-body').innerHTML = h;
+            document.getElementById('modal').style.display = 'flex';
+            setTimeout(() => document.getElementById('sheet').classList.add('up'), 10);
         }
 
-        function closeMod() {
+        function closeM() {
             tg.HapticFeedback.impactOccurred('light');
-            document.getElementById('sheet').classList.remove('active');
-            setTimeout(() => document.getElementById('overlay').style.display = 'none', 350);
+            document.getElementById('sheet').classList.remove('up');
+            setTimeout(() => document.getElementById('modal').style.display = 'none', 350);
         }
 
-        function set(id, v) {
+        function apply(id, v) {
             tg.HapticFeedback.notificationOccurred('success');
-            if(id !== 'bill') document.getElementById('v-'+id).innerText = v.split(' (€')[0];
-            closeMod();
-        }
-
-        function deploy() {
-            tg.HapticFeedback.notificationOccurred('warning');
-            tg.showConfirm('Сформировать запрос на создание VDS?');
+            if(id !== 'billing') document.getElementById('res-'+id).innerText = v.split(' (€')[0];
+            closeM();
         }
     </script>
 </body>
