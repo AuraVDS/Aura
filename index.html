@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS Premium</title>
+    <title>Aura OS v7.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -35,92 +35,79 @@
         }
 
         /* --- HEADER --- */
-        .header-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px;
-        }
-        .lang-switcher {
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .lang-pill {
             background: var(--surface); border: 1px solid var(--border);
             padding: 6px 12px; border-radius: 12px; font-size: 11px;
             font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px;
         }
 
-        .billing-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 24px; padding: 18px; display: flex;
-            justify-content: space-between; align-items: center;
-            margin-bottom: 20px;
-        }
-        .b-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+        /* --- DASHBOARD --- */
+        .aura-brand { text-align: center; margin: 20px 0; }
+        .aura-title { font-size: 38px; font-weight: 900; letter-spacing: 10px; opacity: 0.9; }
 
-        /* --- MAIN DASHBOARD (Новое наполнение) --- */
-        .dashboard { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 30px; }
-        
-        .core-display { text-align: center; position: relative; }
-        .aura-title { 
-            font-size: 42px; font-weight: 900; letter-spacing: 12px; 
-            text-indent: 12px; opacity: 0.9;
-            animation: glow 4s infinite alternate;
-        }
-        @keyframes glow { from { text-shadow: 0 0 10px rgba(165,216,255,0); } to { text-shadow: 0 0 20px rgba(165,216,255,0.4); } }
-
-        .status-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;
-        }
-        .stat-mini {
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-card {
             background: var(--card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 10px;
+            border-radius: 18px; padding: 15px; display: flex; align-items: center; gap: 12px;
+            transition: 0.2s;
         }
+        .stat-card:active { transform: scale(0.96); background: var(--gray); border-color: var(--accent); }
         .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); }
         .stat-t { font-size: 9px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
         .stat-v { font-size: 12px; font-weight: 600; margin-top: 2px; }
 
-        /* --- BUILDER & LIST --- */
-        .view { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
-        .view.active { display: flex; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- VIEWS --- */
+        .view { display: none; flex-direction: column; height: 100%; overflow-y: auto; padding-bottom: 20px; }
+        .view.active { display: flex; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .build-item {
+        .item-row {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: 20px; padding: 18px; margin-bottom: 10px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .build-item:active { background: var(--gray); }
 
-        /* --- BOTTOM NAV --- */
+        /* --- PRICE TABLE --- */
+        .price-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .price-table th { text-align: left; font-size: 10px; color: var(--text-dim); padding: 10px; text-transform: uppercase; }
+        .price-table td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .country-flag { margin-right: 8px; }
+
+        /* --- INFO BOX --- */
+        .info-block {
+            background: var(--card); border-radius: 20px; padding: 20px;
+            margin-bottom: 15px; border-left: 3px solid var(--accent);
+        }
+        .info-block h3 { font-size: 16px; color: var(--accent); margin-bottom: 10px; }
+        .info-block p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+        /* --- NAV --- */
         nav {
-            background: rgba(13, 15, 18, 0.96); backdrop-filter: blur(20px);
+            background: rgba(13, 15, 18, 0.98); backdrop-filter: blur(20px);
             border-top: 1px solid var(--border); display: flex;
             padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.2s; }
-        .nav-item.active { opacity: 1; color: var(--accent); }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.2s; }
+        .nav-link.active { opacity: 1; color: var(--accent); }
         .nav-ico { font-size: 18px; }
-        .nav-lbl { font-size: 9px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
+        .nav-lbl { font-size: 8px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
 
-        /* --- MODALS --- */
+        /* --- SHEET --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: flex-end; z-index: 1000;
         }
         .sheet {
-            background: var(--surface); width: 100%; border-radius: 32px 32px 0 0;
-            padding: 30px 20px; border-top: 1px solid var(--border);
+            background: var(--surface); width: 100%; border-radius: 30px 30px 0 0;
+            padding: 30px 20px; border-top: 1px solid var(--accent);
             transform: translateY(100%); transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
         .sheet.up { transform: translateY(0); }
-        .option {
-            background: var(--card); padding: 18px; border-radius: 16px; 
-            margin-bottom: 10px; display: flex; justify-content: space-between;
-            border: 1px solid var(--border); font-weight: 600;
-        }
-        .option:active { border-color: var(--accent); background: var(--gray); }
-
-        .btn-action {
+        .btn-main {
             background: var(--accent); color: #000; border: none; padding: 18px;
-            border-radius: 20px; font-weight: 900; text-transform: uppercase;
-            width: 100%; margin-top: 10px; letter-spacing: 1px;
+            border-radius: 20px; font-weight: 900; text-transform: uppercase; width: 100%;
         }
     </style>
 </head>
@@ -128,72 +115,91 @@
 
     <div class="app-shell">
         <header class="header-bar">
-            <div class="lang-switcher" onclick="openMod('lang')">
-                <span id="cur-flag">🇷🇺</span> <span id="cur-lang">RU</span>
+            <div class="lang-pill" onclick="openMod('lang')"><span id="f">🇷🇺</span> <span id="l">RU</span></div>
+            <div style="background: var(--surface); padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 800; border: 1px solid var(--border);" onclick="openMod('pay')">
+                <span style="color: var(--text-dim);">Balance:</span> <span style="color: var(--accent);">0.00 €</span>
             </div>
-            <div style="font-size: 10px; color: var(--text-dim); font-weight: 800;">AURA OS v6.0</div>
         </header>
 
-        <div class="billing-card" onclick="openMod('pay')">
-            <div><p style="font-size: 9px; color: var(--text-dim); text-transform: uppercase;">Кошелек</p><p class="b-val">0.00 €</p></div>
-            <div style="background: var(--accent); color: #000; padding: 8px 16px; border-radius: 12px; font-weight: 700; font-size: 11px;">+</div>
-        </div>
-
         <div id="v-home" class="view active">
-            <div class="dashboard">
-                <div class="core-display">
-                    <div class="aura-title">AURA</div>
-                    <p style="font-size: 9px; color: var(--accent); letter-spacing: 4px; margin-top: 5px;">QUANTUM INFRASTRUCTURE</p>
+            <div class="aura-brand">
+                <div class="aura-title">AURA</div>
+                <p style="font-size: 9px; color: var(--accent); letter-spacing: 5px; margin-top: 5px;">CLOUD EVOLUTION</p>
+            </div>
+            
+            <div class="status-grid">
+                <div class="stat-card" onclick="info('Network','Трафик: Безлимит\nПорт: 10 Gbps\nDDoS: Фильтрация активна')">
+                    <div class="dot"></div><div><p class="stat-t">Сеть</p><p class="stat-v">Ready</p></div>
                 </div>
-                
-                <div class="status-grid">
-                    <div class="stat-mini"><div class="dot"></div><div><p class="stat-t">Сеть</p><p class="stat-v">10 Gbps</p></div></div>
-                    <div class="stat-mini"><div class="dot"></div><div><p class="stat-t">Uptime</p><p class="stat-v">99.9%</p></div></div>
-                    <div class="stat-mini"><div class="dot"></div><div><p class="stat-t">Локации</p><p class="stat-v">8 Регионов</p></div></div>
-                    <div class="stat-mini" style="border-color: var(--accent);"><div class="dot" style="background: var(--accent);"></div><div><p class="stat-t">Security</p><p class="stat-v">AES-256</p></div></div>
+                <div class="stat-card" onclick="info('Uptime','Доступность: 99.99%\nПоследняя проверка: 1м назад\nСтатус: Стабильно')">
+                    <div class="dot"></div><div><p class="stat-t">Статус</p><p class="stat-v">Online</p></div>
+                </div>
+                <div class="stat-card" onclick="info('Hardware','CPU: AMD EPYC 7xx3\nDisk: NVMe Gen4\nRAM: DDR5 ECC')">
+                    <div class="dot"></div><div><p class="stat-t">Железо</p><p class="stat-v">Enterprise</p></div>
+                </div>
+                <div class="stat-card" onclick="info('Security','Шифрование: AES-256\nИзоляция: Полная\nFirewall: Настроен')">
+                    <div class="dot"></div><div><p class="stat-t">Защита</p><p class="stat-v">Active</p></div>
                 </div>
             </div>
-            <button class="btn-action" style="margin-top: auto;" onclick="switchView('build', document.querySelectorAll('.nav-item')[1])">Создать машину</button>
+            <button class="btn-main" style="margin-top: auto;" onclick="switchView('build', 1)">Создать сервер</button>
+        </div>
+
+        <div id="v-price" class="view">
+            <h2 style="margin-bottom: 15px;">Тарифы (x1.5 Hetzner)</h2>
+            <table class="price-table">
+                <thead><tr><th>Локация</th><th>vCPU / RAM</th><th>Цена/Мес</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="country-flag">🇩🇪</span>Германия</td><td>2 / 4GB</td><td style="color:var(--accent)">6.75 €</td></tr>
+                    <tr><td><span class="country-flag">🇩🇪</span>Германия</td><td>4 / 8GB</td><td style="color:var(--accent)">12.90 €</td></tr>
+                    <tr><td><span class="country-flag">🇫🇮</span>Финляндия</td><td>2 / 4GB</td><td style="color:var(--accent)">6.50 €</td></tr>
+                    <tr><td><span class="country-flag">🇺🇸</span>США (East)</td><td>4 / 8GB</td><td style="color:var(--accent)">14.20 €</td></tr>
+                    <tr><td><span class="country-flag">🇸🇬</span>Сингапур</td><td>8 / 16GB</td><td style="color:var(--accent)">32.50 €</td></tr>
+                </tbody>
+            </table>
+            <p style="font-size: 11px; color: var(--text-dim); margin-top: 15px; text-align: center;">Цены включают поддержку Aura и защиту от DDoS.</p>
         </div>
 
         <div id="v-build" class="view">
-            <h2 style="margin-bottom: 15px;">Конфигуратор</h2>
-            <div class="build-item" onclick="openMod('loc')"><div><p class="stat-t">Локация</p><p class="stat-v" id="res-loc">Германия</p></div><span>→</span></div>
-            <div class="build-item" onclick="openMod('os')"><div><p class="stat-t">Система</p><p class="stat-v" id="res-os">Ubuntu 24.04</p></div><span>→</span></div>
-            <div class="build-item" onclick="openMod('cpu')"><div><p class="stat-t">Процессор</p><p class="stat-v" id="res-cpu">4 vCPU</p></div><span>→</span></div>
-            <div class="build-item" onclick="openMod('ram')"><div><p class="stat-t">Память</p><p class="stat-v" id="res-ram">8 GB</p></div><span>→</span></div>
-            <div style="margin-top: auto; padding: 20px; background: var(--surface); border-radius: 20px; text-align: center; border: 1px solid var(--accent);">
-                <p class="stat-t">Стоимость</p>
-                <p style="font-size: 24px; font-weight: 800; color: var(--accent);">14.00 € / мес</p>
+            <h2 style="margin-bottom: 20px;">Конструктор</h2>
+            <div class="item-row" onclick="openMod('loc')"><div><p class="stat-t">Локация</p><p class="stat-v" id="b-loc">Германия</p></div><span>→</span></div>
+            <div class="item-row" onclick="openMod('cpu')"><div><p class="stat-t">Процессор</p><p class="stat-v" id="b-cpu">4 vCPU</p></div><span>→</span></div>
+            <div class="item-row" onclick="openMod('ram')"><div><p class="stat-t">Оперативная память</p><p class="stat-v" id="b-ram">8 GB</p></div><span>→</span></div>
+            <div style="margin-top: auto; text-align: center; border: 1px solid var(--accent); padding: 20px; border-radius: 20px;">
+                <p class="stat-t">Итого</p><p style="font-size: 26px; font-weight: 800; color: var(--accent);">12.90 €</p>
             </div>
-            <button class="btn-action" onclick="tg.showConfirm('Развернуть выбранную конфигурацию?')">Оплатить и запустить</button>
+            <button class="btn-main" style="margin-top: 15px;" onclick="tg.showConfirm('Создать машину?')">Оплатить</button>
         </div>
 
-        <div id="v-list" class="view">
-            <h2 style="margin-bottom: 20px;">Активные серверы</h2>
-            <div class="build-item">
-                <div><p style="font-weight:700;">Aura-Node-Alpha</p><p class="stat-t">4 vCPU / 8GB / DE</p></div>
-                <div style="text-align:right"><p style="color:var(--green); font-size:10px; font-weight:800;">ONLINE</p><p style="font-size:14px; font-weight:700;">14.00€</p></div>
+        <div id="v-base" class="view">
+            <h2 style="margin-bottom: 20px;">База знаний</h2>
+            <div class="info-block">
+                <h3>Что такое VDS?</h3>
+                <p>VDS (Virtual Dedicated Server) — это ваш личный компьютер в облаке. Он работает 24/7, к нему можно подключиться из любой точки мира. Вы получаете гарантированные ресурсы, которые не делите с другими.</p>
             </div>
-            <p style="text-align:center; color:var(--text-dim); font-size:12px; margin-top:20px;">Больше серверов не найдено</p>
+            <div class="info-block">
+                <h3>Для чего он нужен?</h3>
+                <p>• Трейдинг: работа ботов без пауз.<br>• Хостинг: запуск сайтов и VPN.<br>• Разработка: компиляция кода на мощном железе.<br>• Гейминг: приватные игровые серверы.</p>
+            </div>
+            <div class="info-block">
+                <h3>Что такое Aura OS?</h3>
+                <p>Aura — это не просто хостинг. Это экосистема, оптимизированная под максимальный отклик (Low Latency) и безопасность. Мы используем только NVMe Gen4 диски и новейшие AMD EPYC процессоры.</p>
+            </div>
         </div>
 
         <div id="v-opts" class="view">
-            <h2 style="margin-bottom: 20px;">Настройки</h2>
-            <div class="build-item"><div><p class="stat-t">Аккаунт</p><p class="stat-v">Danil Zaslavsky</p></div></div>
-            <div class="build-item"><div><p class="stat-t">Безопасность</p><p class="stat-v">2FA Active</p></div></div>
-            <div class="build-item" onclick="openMod('pay')"><div><p class="stat-t">Метод оплаты</p><p class="stat-v">USDT / Card</p></div></div>
-            <div style="margin-top:20px; padding:20px; background:var(--card); border-radius:20px; font-size:12px; color:var(--text-dim); line-height:1.6;">
-                <b>Aura VDS</b> — это ваша независимость в облаке. Мы предоставляем "чистое" железо без лишних надстроек, чтобы вы получили максимум производительности.
-            </div>
+            <h2 style="margin-bottom: 20px;">Профиль</h2>
+            <div class="item-row"><div><p class="stat-t">User</p><p class="stat-v">Danil Zaslavsky</p></div></div>
+            <div class="item-row" onclick="openMod('pay')"><div><p class="stat-t">Balance Control</p><p class="stat-v">Manage Funds</p></div><span>→</span></div>
+            <div class="item-row"><div><p class="stat-t">API Key</p><p class="stat-v">•••• •••• ••••</p></div></div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchView('home', this)"><i>◈</i><span class="nav-lbl">Главная</span></div>
-        <div class="nav-item" onclick="switchView('build', this)"><i>▣</i><span class="nav-lbl">Сборка</span></div>
-        <div class="nav-item" onclick="switchView('list', this)"><i>≡</i><span class="nav-lbl">Серверы</span></div>
-        <div class="nav-item" onclick="switchView('opts', this)"><i>⚙</i><span class="nav-lbl">Опции</span></div>
+        <div class="nav-link active" onclick="switchView('home', 0)"><i>◈</i><span class="nav-lbl">Главная</span></div>
+        <div class="nav-link" onclick="switchView('build', 1)"><i>▣</i><span class="nav-lbl">Сборка</span></div>
+        <div class="nav-link" onclick="switchView('price', 2)"><i>€</i><span class="nav-lbl">Цены</span></div>
+        <div class="nav-link" onclick="switchView('base', 3)"><i>📖</i><span class="nav-lbl">База</span></div>
+        <div class="nav-link" onclick="switchView('opts', 4)"><i>⚙</i><span class="nav-lbl">Опции</span></div>
     </nav>
 
     <div class="modal" id="modal" onclick="closeMod()">
@@ -208,20 +214,24 @@
         tg.setHeaderColor('#0d0f12');
 
         const db = {
-            loc: { t: 'Локация', o: ['Германия', 'Финляндия', 'США', 'Нидерланды'] },
-            os: { t: 'Операционная система', o: ['Ubuntu 24.04', 'Windows Server', 'Debian 12', 'CentOS 9'] },
-            cpu: { t: 'Процессор', o: ['2 vCPU', '4 vCPU', '8 vCPU', '16 vCPU'] },
-            ram: { t: 'Память', o: ['4 GB', '8 GB', '16 GB', '32 GB'] },
-            pay: { t: 'Пополнение баланса', o: ['💳 Банковская карта', '💎 Crypto (USDT)', '🔗 P2P Перевод'] },
-            lang: { t: 'Выберите язык', o: ['🇷🇺 Русский', '🇺🇸 English'] }
+            loc: { t: 'Локация', o: ['Германия', 'Финляндия', 'США', 'Сингапур'] },
+            cpu: { t: 'vCPU', o: ['2 Cores', '4 Cores', '8 Cores', '16 Cores'] },
+            ram: { t: 'RAM', o: ['4 GB', '8 GB', '16 GB', '32 GB'] },
+            lang: { t: 'Language', o: ['🇷🇺 Русский', '🇺🇸 English'] },
+            pay: { t: 'Пополнение', o: ['💳 Карта', '💎 USDT (TRC-20)', '🔗 P2P'] }
         };
 
-        function switchView(id, el) {
+        function switchView(id, idx) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             document.getElementById('v-' + id).classList.add('active');
-            el.classList.add('active');
+            document.querySelectorAll('.nav-link')[idx].classList.add('active');
+        }
+
+        function info(title, text) {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showAlert(`${title}\n\n${text}`);
         }
 
         function openMod(id) {
@@ -229,7 +239,7 @@
             tg.HapticFeedback.impactOccurred('medium');
             let h = `<h3 style="text-align:center; margin-bottom:25px; font-size:18px; color:var(--accent);">${d.t}</h3>`;
             d.o.forEach(o => {
-                h += `<div class="option" onclick="set('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
+                h += `<div class="item-row" onclick="set('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
             });
             document.getElementById('m-body').innerHTML = h;
             document.getElementById('modal').style.display = 'flex';
@@ -245,12 +255,10 @@
         function set(id, v) {
             tg.HapticFeedback.notificationOccurred('success');
             if(id === 'lang') {
-                const flag = v.split(' ')[0];
-                const code = v.split(' ')[1].substring(0,2).toUpperCase();
-                document.getElementById('cur-flag').innerText = flag;
-                document.getElementById('cur-lang').innerText = code;
+                document.getElementById('f').innerText = v.split(' ')[0];
+                document.getElementById('l').innerText = v.split(' ')[1].substring(0,2).toUpperCase();
             } else if(id !== 'pay') {
-                document.getElementById('res-'+id).innerText = v;
+                document.getElementById('b-'+id).innerText = v;
             }
             closeMod();
         }
