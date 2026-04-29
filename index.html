@@ -3,187 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura Absolute</title>
+    <title>Aura Cloud OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg: #000000;
-            --surface: #0c0c0d;
-            --card: #141415;
-            --accent: #ffffff;
-            --border: #1f1f21;
-            --dim: #636366;
-            --green: #00ffa3;
+            --surface: #0a0c10;
+            --card: #11141b;
+            --accent: #00d1ff; /* Тот самый голубой */
+            --text: #ffffff;
+            --border: #1e2633;
+            --dim: #707e94;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, "SF Pro Display", sans-serif;
-            background: var(--bg); color: var(--accent);
+            background: var(--bg); color: var(--text);
             height: 100dvh; width: 100vw;
             overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .app-container {
+        .app-content {
             flex: 1; padding: 20px;
-            padding-top: calc(15px + env(safe-area-inset-top));
+            padding-top: calc(10px + env(safe-area-inset-top));
             display: flex; flex-direction: column;
             overflow: hidden;
         }
 
-        /* --- UI ELEMENTS --- */
-        .balance-bar {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; transition: 0.3s;
+        /* --- БАЛАНС БАР --- */
+        .top-billing {
+            background: linear-gradient(180deg, var(--surface), #000);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 18px 22px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 209, 255, 0.05);
         }
-        .balance-bar:active { transform: scale(0.98); background: #111; }
-        .bal-info span { display: block; }
-        .bal-t { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
-        .bal-v { font-size: 20px; font-weight: 700; }
-
-        /* Central Pulse Logo */
-        .hero-section {
-            flex: 1; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; gap: 20px;
-        }
-        .pulse-logo {
-            font-size: 32px; font-weight: 900; letter-spacing: 12px;
-            text-indent: 12px; position: relative;
-            animation: aura-breath 4s infinite ease-in-out;
-        }
-        @keyframes aura-breath {
-            0%, 100% { opacity: 0.4; transform: scale(0.98); filter: blur(1px); }
-            50% { opacity: 1; transform: scale(1.05); filter: blur(0px); }
+        .bal-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; }
+        .bal-amount { font-size: 24px; font-weight: 800; color: var(--accent); }
+        .add-funds {
+            background: var(--accent); color: #000; border: none;
+            padding: 8px 16px; border-radius: 12px; font-weight: 700; font-size: 12px;
         }
 
-        /* Config Grid */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: auto; }
-        .node {
+        /* --- ЦЕНТРАЛЬНОЕ ЛОГО --- */
+        .aura-core {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .logo-text {
+            font-size: 40px; font-weight: 900; letter-spacing: 15px;
+            color: var(--text); text-shadow: 0 0 20px rgba(0, 209, 255, 0.4);
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; filter: blur(0px); }
+            50% { transform: scale(1.05); opacity: 1; filter: blur(1px); }
+        }
+
+        /* --- СЕТКА КОНФИГА --- */
+        .quick-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; }
+        .q-item {
             background: var(--card); border: 1px solid var(--border);
-            border-radius: 22px; padding: 18px; transition: 0.2s;
+            border-radius: 20px; padding: 15px; transition: 0.2s;
         }
-        .node:active { border-color: var(--dim); transform: translateY(-2px); }
-        .n-l { font-size: 9px; color: var(--dim); text-transform: uppercase; font-weight: 700; }
-        .n-v { font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .q-item:active { border-color: var(--accent); transform: scale(0.97); }
+        .q-t { font-size: 9px; color: var(--dim); text-transform: uppercase; font-weight: 700; }
+        .q-v { font-size: 13px; font-weight: 600; margin-top: 4px; color: var(--accent); }
 
-        /* --- VIEWS --- */
-        .view { display: none; flex-direction: column; height: 100%; }
-        .view.active { display: flex; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Servers List */
-        .s-item {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 18px; margin-bottom: 12px;
+        /* --- ВЫБОР СЕРВЕРОВ (ТАРИФЫ) --- */
+        .server-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .server-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 22px; padding: 20px; margin-bottom: 15px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .s-price { font-size: 13px; font-weight: 700; color: var(--green); }
+        .srv-info h4 { font-size: 16px; margin-bottom: 4px; }
+        .srv-info p { font-size: 11px; color: var(--dim); line-height: 1.4; }
+        .srv-meta { text-align: right; }
+        .ping { font-size: 10px; color: #00ffa3; font-weight: 700; margin-bottom: 5px; }
+        .price { font-size: 16px; font-weight: 800; color: var(--accent); }
 
-        /* --- NAVIGATION --- */
+        /* --- НАВИГАЦИЯ --- */
         nav {
-            background: rgba(10, 10, 11, 0.98); backdrop-filter: blur(20px);
+            background: rgba(5, 7, 10, 0.95); backdrop-filter: blur(20px);
             border-top: 1px solid var(--border); display: flex;
-            padding: 15px 0 calc(15px + env(safe-area-inset-bottom));
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
         }
-        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; }
-        .nav-link.active { opacity: 1; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; }
+        .nav-btn.active { opacity: 1; color: var(--accent); }
         .nav-ico { font-size: 20px; }
-        .nav-txt { font-size: 9px; font-weight: 700; margin-top: 5px; text-transform: uppercase; }
+        .nav-lbl { font-size: 10px; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
 
-        /* --- MODALS --- */
+        /* --- ШТОРКИ (MODALS) --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
             display: none; justify-content: center; align-items: flex-end; z-index: 9999;
         }
         .sheet {
-            background: #0d0d0f; width: 100%; border-radius: 35px 35px 0 0;
-            padding: 40px 25px; border-top: 1px solid var(--border);
-            transform: translateY(100%); transition: 0.4s cubic-bezier(0.1, 0.9, 0.1, 1);
+            background: #0d1117; width: 100%; border-radius: 30px 30px 0 0;
+            padding: 35px 25px; border-top: 1px solid var(--accent);
+            transform: translateY(100%); transition: 0.4s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
         .sheet.up { transform: translateY(0); }
-        .opt {
-            background: var(--card); padding: 22px; border-radius: 20px; margin-bottom: 10px;
+        .opt-row {
+            background: var(--card); padding: 20px; border-radius: 18px; margin-bottom: 10px;
             display: flex; justify-content: space-between; border: 1px solid var(--border);
         }
-        .opt:active { background: #1a1a1c; }
+        .opt-row:active { border-color: var(--accent); background: #161b22; }
 
-        .btn-main {
+        .btn-order {
             background: var(--accent); color: #000; border: none; padding: 20px;
-            border-radius: 22px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 2px; width: 100%; margin-top: 20px;
+            border-radius: 20px; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 2px; width: 100%; margin-top: 15px; box-shadow: 0 0 20px rgba(0, 209, 255, 0.3);
         }
+
+        .view { display: none; flex-direction: column; height: 100%; animation: slide 0.3s ease; }
+        .view.active { display: flex; }
+        @keyframes slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <div class="balance-bar" onclick="openM('billing')">
-            <div class="bal-info">
-                <span class="bal-t">Кошелек Aura</span>
-                <span class="bal-v">0.00 €</span>
+    <div class="app-content">
+        <div class="top-billing" onclick="openMod('pay')">
+            <div>
+                <p class="bal-label">Ваш баланс</p>
+                <p class="bal-amount">0.00 €</p>
             </div>
-            <div style="font-size: 18px;">⊕</div>
+            <button class="add-funds">ПОПОЛНИТЬ</button>
         </div>
 
-        <div id="v-home" class="view active">
-            <div class="hero-section">
-                <div class="pulse-logo">AURA</div>
-                <div style="font-size: 10px; color: var(--dim); letter-spacing: 4px;">QUANTUM CLOUD</div>
+        <div id="view-main" class="view active">
+            <div class="aura-core">
+                <div class="logo-text">AURA</div>
+                <p style="font-size: 9px; color: var(--dim); letter-spacing: 5px; margin-top: 10px;">PREMIUM CLOUD OS</p>
             </div>
             
-            <div class="grid">
-                <div class="node" onclick="openM('loc')"><div class="n-l">Регион</div><div class="n-v" id="res-loc">Germany</div></div>
-                <div class="node" onclick="openM('os')"><div class="n-l">Система</div><div class="n-v" id="res-os">Ubuntu 24.04</div></div>
-                <div class="node" onclick="openM('cpu')"><div class="n-l">Ядра</div><div class="n-v" id="res-cpu">4 vCPU</div></div>
-                <div class="node" onclick="openM('ram')"><div class="n-l">Память</div><div class="n-v" id="res-ram">8 GB</div></div>
+            <div class="quick-settings">
+                <div class="q-item" onclick="openMod('loc')"><p class="q-t">Локация</p><p class="q-v" id="v-loc">Германия</p></div>
+                <div class="q-item" onclick="openMod('os')"><p class="q-t">Система</p><p class="q-v" id="v-os">Windows</p></div>
+                <div class="q-item" onclick="openMod('cpu')"><p class="q-t">Процессор</p><p class="q-v" id="v-cpu">4 vCPU</p></div>
+                <div class="q-item" onclick="openMod('ram')"><p class="q-t">Память</p><p class="q-v" id="v-ram">8 GB RAM</p></div>
             </div>
-            <button class="btn-main" onclick="tg.showConfirm('Инициализировать создание сервера?')">Создать сервер</button>
+            <button class="btn-order" onclick="tg.showConfirm('Развернуть сервер?')">Создать сервер</button>
         </div>
 
-        <div id="v-list" class="view">
-            <h2 style="margin-bottom: 20px;">Мои Сервера</h2>
-            <div class="s-item">
-                <div>
-                    <div style="font-weight:700">Aura-Node-01</div>
-                    <div style="font-size:10px; color:var(--dim)">Ubuntu / 4 CPU / Frankfurt</div>
+        <div id="view-servers" class="view">
+            <h2 style="margin-bottom: 20px; font-size: 22px;">Доступные тарифы</h2>
+            <div class="server-list">
+                <div class="server-card">
+                    <div class="srv-info">
+                        <h4>Aura Entry</h4>
+                        <p>2 vCPU / 4GB RAM / 40GB NVMe<br>Локация: Финляндия</p>
+                    </div>
+                    <div class="srv-meta">
+                        <div class="ping">● 24 ms</div>
+                        <div class="price">8 €</div>
+                    </div>
                 </div>
-                <div class="s-price">€14.00</div>
-            </div>
-            <div class="s-item" style="opacity: 0.5;">
-                <div>
-                    <div style="font-weight:700">Aura-Backup-ST</div>
-                    <div style="font-size:10px; color:var(--dim)">Debian / 2 CPU / Helsinki</div>
+                <div class="server-card" style="border-color: var(--accent);">
+                    <div class="srv-info">
+                        <h4>Aura Professional</h4>
+                        <p>4 vCPU / 8GB RAM / 80GB NVMe<br>Локация: Германия</p>
+                    </div>
+                    <div class="srv-meta">
+                        <div class="ping">● 38 ms</div>
+                        <div class="price">14 €</div>
+                    </div>
                 </div>
-                <div class="s-price">€8.50</div>
+                <div class="server-card">
+                    <div class="srv-info">
+                        <h4>Aura Enterprise</h4>
+                        <p>8 vCPU / 16GB RAM / 160GB NVMe<br>Локация: США</p>
+                    </div>
+                    <div class="srv-meta">
+                        <div class="ping">● 105 ms</div>
+                        <div class="price">28 €</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="v-set" class="view">
-            <h2 style="margin-bottom: 20px;">Опции</h2>
-            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Аккаунт</div><div class="n-v">Danil Zaslavsky</div></div>
-            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Язык системы</div><div class="n-v">Русский (RU)</div></div>
-            <div class="node" style="width:100%; margin-bottom:10px;"><div class="n-l">Версия ПО</div><div class="n-v">Aura Absolute v3.1</div></div>
-            <div style="margin-top:20px; font-size:12px; color:var(--dim); line-height:1.6;">
-                <b>VDS</b> — это выделенный ресурс, который работает только на вас. 
-                В отличие от обычного хостинга, здесь вся мощность процессора и RAM зарезервирована за вами. 
-                Идеально для ботов, трейдинга и безопасного серфинга.
+        <div id="view-info" class="view">
+            <h2 style="margin-bottom: 20px; font-size: 22px;">Инфо-центр</h2>
+            <div class="q-item" style="margin-bottom: 10px; width: 100%;"><p class="q-t">Пользователь</p><p class="q-v">Danil Zaslavsky</p></div>
+            <div class="q-item" style="margin-bottom: 10px; width: 100%;"><p class="q-t">Статус</p><p class="q-v" style="color: #00ffa3;">Верифицирован</p></div>
+            
+            <div style="margin-top: 15px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 20px; font-size: 12px; line-height: 1.6; color: var(--dim);">
+                <b style="color: var(--text);">Что такое VDS?</b><br>
+                Это виртуальный сервер, который принадлежит только вам. Он работает 24/7, не зависит от вашего интернета и позволяет запускать любой софт удаленно. Идеально для трейдинга, ботов и обхода ограничений.
             </div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-link active" onclick="tab('home', this)"><span class="nav-ico">◈</span><span class="nav-txt">Aura</span></div>
-        <div class="nav-link" onclick="tab('list', this)"><span class="nav-ico">▣</span><span class="nav-txt">Узлы</span></div>
-        <div class="nav-link" onclick="tab('set', this)"><span class="nav-ico">⚙</span><span class="nav-txt">Инфо</span></div>
+        <div class="nav-btn active" onclick="tab('main', this)"><span class="nav-ico">◈</span><span class="nav-lbl">Главная</span></div>
+        <div class="nav-btn" onclick="tab('servers', this)"><span class="nav-ico">▣</span><span class="nav-lbl">Тарифы</span></div>
+        <div class="nav-btn" onclick="tab('info', this)"><span class="nav-ico">⚙</span><span class="nav-lbl">Опции</span></div>
     </nav>
 
-    <div class="modal" id="modal" onclick="closeM()">
+    <div class="modal" id="modal" onclick="closeMod()">
         <div class="sheet" id="sheet" onclick="event.stopPropagation()">
-            <div id="m-body"></div>
+            <div id="m-content"></div>
         </div>
     </div>
 
@@ -192,44 +216,47 @@
         tg.expand();
         tg.setHeaderColor('#000000');
 
-        const data = {
-            loc: { t: 'Локация', o: ['Германия (€0)', 'Финляндия (€0)', 'США (€2)'] },
-            os: { t: 'ОС Сервера', o: ['Ubuntu 24.04', 'Windows Server', 'Debian 12'] },
-            cpu: { t: 'Мощность CPU', o: ['2 Cores (€8)', '4 Cores (€14)', '8 Cores (€28)'] },
-            ram: { t: 'Память RAM', o: ['4 GB', '8 GB', '16 GB'] },
-            billing: { t: 'Пополнение', o: ['💳 Карты РФ/Мир', '💎 Crypto (USDT)', '🔗 P2P Перевод'] }
+        const catalog = {
+            loc: { t: 'Выберите регион', o: ['Германия (Low Ping)', 'Финляндия (Fast)', 'США (Global)'] },
+            os: { t: 'Операционная система', o: ['Windows Server 2022', 'Ubuntu 24.04 LTS', 'Debian 12'] },
+            cpu: { t: 'Мощность процессора', o: ['2 vCPU', '4 vCPU', '8 vCPU'] },
+            ram: { t: 'Объем памяти', o: ['4 GB RAM', '8 GB RAM', '16 GB RAM'] },
+            pay: { t: 'Пополнение баланса', o: ['💳 Банковская карта', '💎 Crypto (USDT)', '🔗 P2P Перевод'] }
         };
 
         function tab(id, el) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById('v-' + id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
             el.classList.add('active');
         }
 
-        function openM(id) {
-            const d = data[id];
+        function openMod(id) {
+            const d = catalog[id];
             tg.HapticFeedback.impactOccurred('medium');
-            let h = `<div style="text-align:center; font-weight:800; margin-bottom:30px; font-size:22px;">${d.t}</div>`;
+            let h = `<h3 style="text-align:center; margin-bottom:25px; font-size:20px; color:var(--accent);">${d.t}</h3>`;
             d.o.forEach(o => {
-                h += `<div class="opt" onclick="apply('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
+                h += `<div class="opt-row" onclick="select('${id}','${o}')"><span>${o}</span><span>→</span></div>`;
             });
-            document.getElementById('m-body').innerHTML = h;
+            document.getElementById('m-content').innerHTML = h;
             document.getElementById('modal').style.display = 'flex';
             setTimeout(() => document.getElementById('sheet').classList.add('up'), 10);
         }
 
-        function closeM() {
+        function closeMod() {
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('sheet').classList.remove('up');
             setTimeout(() => document.getElementById('modal').style.display = 'none', 350);
         }
 
-        function apply(id, v) {
+        function select(id, v) {
             tg.HapticFeedback.notificationOccurred('success');
-            if(id !== 'billing') document.getElementById('res-'+id).innerText = v.split(' (€')[0];
-            closeM();
+            if(id !== 'pay') {
+                const label = v.split(' (')[0];
+                document.getElementById('v-'+id).innerText = label;
+            }
+            closeMod();
         }
     </script>
 </body>
