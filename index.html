@@ -3,251 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS Bento</title>
+    <title>Aura OS v13</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #08090a;
-            --surface: #141619;
-            --card: rgba(255, 255, 255, 0.03);
+            --bg: #050607;
+            --surface: #0f1114;
             --accent: #b3e5fc;
-            --border: rgba(179, 229, 252, 0.1);
-            --text: #eef2f5;
-            --text-dim: #70777f;
-            --green: #81e6d9;
+            --border: rgba(179, 229, 252, 0.08);
+            --card: rgba(255, 255, 255, 0.02);
+            --text: #eef2f6;
+            --text-dim: #64748b;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, "SF Pro Display", sans-serif;
             background: var(--bg); color: var(--text);
-            height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column;
+            height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .app-container { flex: 1; padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; overflow: hidden; }
+        .container { flex: 1; padding: 20px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+        
+        /* Фоновый декор чтобы не было пусто */
+        .aura-bg { position: absolute; top: -10%; right: -10%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(179, 229, 252, 0.05) 0%, transparent 70%); z-index: 0; pointer-events: none; }
 
-        /* --- HEADER --- */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logo-small { font-size: 16px; font-weight: 900; letter-spacing: 4px; color: var(--text); opacity: 0.8; }
-        .lang-toggle { background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; color: var(--accent); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; z-index: 1; }
+        .logo { font-size: 18px; font-weight: 900; letter-spacing: 6px; }
 
-        /* --- BENTO GRID --- */
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, auto);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .bento-item { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 18px; transition: 0.2s; }
-        .bento-item:active { transform: scale(0.97); background: rgba(255,255,255,0.05); }
-
-        .big { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(145deg, #141619, #08090a); }
-        .bal-wrap { display: flex; flex-direction: column; }
-        .bal-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-        .bal-value { font-size: 28px; font-weight: 800; color: var(--accent); margin-top: 4px; }
-        .topup-btn { background: var(--accent); color: #000; border: none; width: 40px; height: 40px; border-radius: 14px; font-size: 18px; font-weight: 700; }
-
-        .stat-label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; display: block; }
-        .stat-value { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
-
-        /* --- ACTIVITY FEED --- */
-        .feed-title { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; padding-left: 5px; }
-        .feed { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .feed-item { background: rgba(255,255,255,0.01); padding: 12px 15px; border-radius: 16px; display: flex; gap: 12px; align-items: center; border: 1px solid transparent; }
-        .feed-item i { font-size: 14px; color: var(--text-dim); }
-        .feed-text { font-size: 12px; color: var(--text-dim); }
-        .feed-text b { color: var(--text); }
+        /* --- DASHBOARD --- */
+        .bento-main { display: grid; gap: 15px; z-index: 1; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 26px; padding: 20px; transition: 0.3s; }
+        
+        .bal-display { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0f1114 0%, #050607 100%); }
+        .bal-val { font-size: 32px; font-weight: 800; color: var(--accent); }
 
         /* --- VIEWS --- */
-        .view { display: none; flex-direction: column; height: 100%; animation: slideUp 0.3s ease-out; }
+        .view { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.4s ease; }
         .view.active { display: flex; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .row-item { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        /* --- PAYMENT MENU --- */
+        .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .pay-opt { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 16px; text-align: center; font-weight: 700; }
+        .pay-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(179, 229, 252, 0.05); }
+        .input-sum { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 18px; color: #fff; width: 100%; font-size: 16px; outline: none; margin-bottom: 10px; }
+
+        /* --- WIKI / INFO --- */
+        .wiki-item { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 10px; }
+        .wiki-item h4 { color: var(--accent); margin-bottom: 5px; font-size: 14px; }
+        .wiki-item p { font-size: 13px; color: var(--text-dim); line-height: 1.4; }
 
         /* --- NAV --- */
-        nav { background: rgba(8, 9, 10, 0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(12px + env(safe-area-inset-bottom)); }
-        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.2s; }
-        .nav-link.active { opacity: 1; color: var(--accent); }
-        .nav-link i { font-size: 18px; }
-        .nav-link span { font-size: 9px; font-weight: 800; margin-top: 5px; text-transform: uppercase; }
+        nav { background: rgba(5, 6, 7, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 12px 0 calc(15px + env(safe-area-inset-bottom)); }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.2s; }
+        .nav-btn.active { opacity: 1; color: var(--accent); }
+        .nav-btn i { font-size: 18px; margin-bottom: 5px; }
+        .nav-btn span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
-        /* --- MODALS --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: flex-end; z-index: 9999; }
-        .sheet { background: var(--surface); width: 100%; border-radius: 32px 32px 0 0; padding: 30px 20px; border-top: 2px solid var(--accent); transform: translateY(100%); transition: 0.4s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        .sheet.up { transform: translateY(0); }
-        .opt { background: var(--card); padding: 18px; border-radius: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid var(--border); }
-        .opt:active { background: var(--accent); color: #000; }
-
-        .btn-confirm { background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 20px; font-weight: 900; text-transform: uppercase; width: 100%; margin-top: auto; }
+        .btn-action { background: var(--accent); color: #000; border: none; padding: 20px; border-radius: 22px; font-weight: 900; text-transform: uppercase; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="container">
+        <div class="aura-bg"></div>
         <header>
-            <div class="logo-small">AURA OS</div>
-            <div class="lang-toggle" onclick="openMod('lang')"><span id="f">🇷🇺</span> <span id="l">RU</span></div>
+            <div class="logo">AURA</div>
+            <div style="font-size: 12px; font-weight: 700; color: var(--text-dim);">v13.0</div>
         </header>
 
         <div id="v-home" class="view active">
-            <div class="bento-grid">
-                <div class="bento-item big" onclick="openMod('pay')">
-                    <div class="bal-wrap">
-                        <span class="bal-label" data-key="balance">Баланс</span>
-                        <span class="bal-value">$0.00</span>
-                    </div>
-                    <button class="topup-btn">+</button>
+            <div class="card bal-display">
+                <div>
+                    <p style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">Ваш баланс</p>
+                    <p class="bal-val" id="main-bal">$0.00</p>
                 </div>
-                <div class="bento-item" onclick="tg.showAlert('Все системы Aura Cloud работают в штатном режиме. Аптайм 100% за 30 дней.')">
-                    <span class="stat-label" data-key="status">Статус</span>
-                    <span class="stat-value"><div class="dot"></div> Online</span>
-                </div>
-                <div class="bento-item" onclick="switchView('build', 1)">
-                    <span class="stat-label" data-key="nodes">Регионы</span>
-                    <span class="stat-value">8 Local</span>
-                </div>
-                <div class="bento-item" style="grid-column: span 2;" onclick="switchView('build', 1)">
-                    <span class="stat-label" data-key="quick">Быстрое действие</span>
-                    <span class="stat-value" style="color: var(--accent);" data-key="create">Собрать новый VDS →</span>
+                <i class="fas fa-wallet" style="font-size: 24px; opacity: 0.2;"></i>
+            </div>
+
+            <div id="status-area">
+                <div class="card" style="text-align: center; border-style: dashed; padding: 40px 20px;">
+                    <p style="color: var(--text-dim); font-size: 13px;">Серверы не найдены</p>
+                    <p style="font-size: 11px; color: rgba(179, 229, 252, 0.4); margin-top: 5px;">Создайте конфигурацию в разделе «Купить»</p>
                 </div>
             </div>
 
-            <div class="feed-title" data-key="activity">Последняя активность</div>
-            <div class="feed">
-                <div class="feed-item"><i class="fas fa-shield-alt"></i><div class="feed-text"><b data-key="f1">Безопасность:</b> Вход выполнен из Moscow, RU</div></div>
-                <div class="feed-item"><i class="fas fa-microchip"></i><div class="feed-text"><b data-key="f2">Система:</b> Узел Frankfurt-01 стабилизирован</div></div>
-                <div class="feed-item" style="opacity: 0.5;"><i class="fas fa-info-circle"></i><div class="feed-text" data-key="f3">Добро пожаловать в Aura OS v11.0</div></div>
+            <div class="card" style="background: transparent; border: none; padding: 10px;">
+                <p style="font-size: 11px; color: var(--text-dim); line-height: 1.6;">
+                    <i class="fas fa-shield-halved" style="margin-right: 5px;"></i> Система защиты Aura Shield активна. Ваши данные шифруются по стандарту AES-256.
+                </p>
             </div>
         </div>
 
         <div id="v-build" class="view">
-            <h2 style="margin-bottom: 20px; font-weight: 800;" data-key="b_title">Конструктор</h2>
-            <div class="row-item" onclick="openMod('loc')"><div><span class="bal-label" data-key="loc">Локация</span><p id="r-loc">Germany</p></div><i class="fas fa-chevron-right"></i></div>
-            <div class="row-item" onclick="openMod('cpu')"><div><span class="bal-label" data-key="cpu">Процессор</span><p id="r-cpu">2 Cores</p></div><i class="fas fa-chevron-right"></i></div>
-            <div class="row-item" onclick="openMod('ram')"><div><span class="bal-label" data-key="ram">Память</span><p id="r-ram">4 GB</p></div><i class="fas fa-chevron-right"></i></div>
-            <div class="row-item" onclick="openMod('ssd')"><div><span class="bal-label" data-key="ssd">NVMe Диск</span><p id="r-ssd">40 GB</p></div><i class="fas fa-chevron-right"></i></div>
-            <div class="row-item" onclick="openMod('soft')"><div><span class="bal-label" data-key="soft">Пресет</span><p id="r-soft">Clean OS</p></div><i class="fas fa-chevron-right"></i></div>
-            
-            <div style="margin-top: auto; padding: 25px; background: var(--surface); border: 1px solid var(--accent); border-radius: 24px; text-align: center;">
-                <span class="bal-label" data-key="total">Итого в месяц</span>
-                <p style="font-size: 32px; font-weight: 800; color: var(--accent);" id="total-price">$8.50</p>
+            <h3 style="margin-bottom: 10px;">Конфигуратор</h3>
+            <div class="card" onclick="openMod('loc')" style="display: flex; justify-content: space-between;">
+                <span>Локация</span> <b id="r-loc" style="color: var(--accent);">Германия</b>
             </div>
-            <button class="btn-confirm" style="margin-top: 15px;" onclick="tg.showConfirm('Развернуть сервер с выбранными параметрами?')" data-key="deploy">ЗАПУСТИТЬ</button>
+            <div class="card" onclick="openMod('cpu')" style="display: flex; justify-content: space-between;">
+                <span>Процессор</span> <b id="r-cpu" style="color: var(--accent);">2 Cores</b>
+            </div>
+            <div class="card" onclick="openMod('ram')" style="display: flex; justify-content: space-between;">
+                <span>RAM</span> <b id="r-ram" style="color: var(--accent);">4 GB</b>
+            </div>
+            
+            <div style="margin-top: auto; text-align: center;">
+                <p style="font-size: 11px; color: var(--text-dim);">Месячный план</p>
+                <p style="font-size: 36px; font-weight: 800; color: var(--accent); margin: 10px 0;" id="total-price">$6.00</p>
+                <button class="btn-action" onclick="tg.showConfirm('Списать $6.00 с баланса?')">Развернуть сейчас</button>
+            </div>
+        </div>
+
+        <div id="v-pay" class="view">
+            <h3>Пополнение баланса</h3>
+            <p style="font-size: 12px; color: var(--text-dim);">Выберите сумму или введите свою</p>
+            
+            <div class="pay-grid">
+                <div class="pay-opt" onclick="setSum(5)">$5</div>
+                <div class="pay-opt" onclick="setSum(10)">$10</div>
+                <div class="pay-opt" onclick="setSum(50)">$50</div>
+            </div>
+            
+            <input type="number" class="input-sum" id="custom-sum" placeholder="Другая сумма...">
+            
+            <div class="card" style="margin-bottom: 20px;">
+                <p style="font-size: 12px; margin-bottom: 10px;">Способ оплаты:</p>
+                <div style="display: flex; gap: 10px;">
+                    <i class="fab fa-cc-visa" style="font-size: 24px;"></i>
+                    <i class="fab fa-bitcoin" style="font-size: 24px;"></i>
+                    <i class="fas fa-exchange-alt" style="font-size: 24px;"></i>
+                </div>
+            </div>
+            <button class="btn-action">Перейти к оплате</button>
         </div>
 
         <div id="v-info" class="view">
-            <h2 style="margin-bottom: 20px; font-weight: 800;" data-key="i_title">Информация</h2>
-            <div class="row-item"><div><span class="bal-label" data-key="acc">Аккаунт</span><p>Danil Zaslavsky</p></div></div>
-            <div class="row-item" onclick="tg.openTelegramLink('https://t.me/aura_support')"><div><span class="bal-label" data-key="support">Поддержка</span><p>@aura_support</p></div><i class="fas fa-headset"></i></div>
-            
-            <div style="background: var(--card); padding: 20px; border-radius: 24px; border-left: 3px solid var(--accent); margin-top: 10px;">
-                <h3 style="font-size: 16px; color: var(--accent); margin-bottom: 8px;" data-key="q1">Что такое VDS?</h3>
-                <p style="font-size: 13px; color: var(--text-dim); line-height: 1.5;" data-key="a1">Virtual Dedicated Server — это ваш личный выделенный ресурс в облаке. В отличие от обычного хостинга, вы получаете 100% мощности CPU и RAM только для своих задач.</p>
+            <h3>Ознакомление</h3>
+            <div class="wiki-item">
+                <h4>Что такое VDS?</h4>
+                <p>Это виртуальный выделенный сервер. Вы получаете часть физического сервера, которая работает только на вас, обеспечивая 100% стабильность.</p>
+            </div>
+            <div class="wiki-item">
+                <h4>Как пользоваться?</h4>
+                <p>После покупки вы получите IP-адрес, логин (root) и пароль. Используйте любой SSH-клиент для управления сервером.</p>
+            </div>
+            <div class="wiki-item">
+                <h4>Что такое Aura?</h4>
+                <p>Это экосистема облачных решений, оптимизированная под минимальный отклик и высокую безопасность данных.</p>
             </div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-link active" onclick="switchView('home', 0)"><i class="fas fa-th-large"></i><span data-key="n1">Главная</span></div>
-        <div class="nav-link" onclick="switchView('build', 1)"><i class="fas fa-layer-group"></i><span data-key="n2">Сборка</span></div>
-        <div class="nav-link" onclick="switchView('info', 2)"><i class="fas fa-info-circle"></i><span data-key="n3">Инфо</span></div>
+        <div class="nav-btn active" onclick="switchView('home', 0)"><i class="fas fa-home"></i><span>Главная</span></div>
+        <div class="nav-btn" onclick="switchView('build', 1)"><i class="fas fa-server"></i><span>Купить</span></div>
+        <div class="nav-btn" onclick="switchView('pay', 2)"><i class="fas fa-wallet"></i><span>Пополнить</span></div>
+        <div class="nav-btn" onclick="switchView('info', 3)"><i class="fas fa-book"></i><span>Инфо</span></div>
     </nav>
-
-    <div class="modal" id="modal" onclick="closeMod()">
-        <div class="sheet" id="sheet" onclick="event.stopPropagation()">
-            <div id="m-body"></div>
-        </div>
-    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#08090a');
-
-        const i18n = {
-            ru: {
-                balance: "Баланс", status: "Статус", nodes: "Регионы", quick: "Быстрое действие", create: "Собрать новый VDS →",
-                activity: "Последняя активность", f1: "Безопасность:", f2: "Система:", f3: "Добро пожаловать в Aura OS v11.0",
-                b_title: "Конфигуратор", loc: "Локация", cpu: "Процессор", ram: "Память", ssd: "NVMe Диск", soft: "Пресет", total: "Итого в месяц", deploy: "ЗАПУСТИТЬ",
-                i_title: "Информация", acc: "Аккаунт", support: "Поддержка", q1: "Что такое VDS?", a1: "Это выделенный ресурс в облаке. Вы получаете 100% мощности CPU и RAM только для себя.",
-                n1: "Главная", n2: "Сборка", n3: "Инфо"
-            },
-            en: {
-                balance: "Balance", status: "Status", nodes: "Regions", quick: "Quick Action", create: "Build New VDS →",
-                activity: "Recent Activity", f1: "Security:", f2: "System:", f3: "Welcome to Aura OS v11.0",
-                b_title: "Configurator", loc: "Location", cpu: "Processor", ram: "Memory", ssd: "NVMe Disk", soft: "Preset", total: "Total per Month", deploy: "DEPLOY",
-                i_title: "Information", acc: "Account", support: "Support", q1: "What is VDS?", a1: "It is a dedicated resource in the cloud. You get 100% of CPU and RAM power just for yourself.",
-                n1: "Home", n2: "Build", n3: "Info"
-            }
-        };
-
-        const db = {
-            loc: { t: 'Region', o: ['Germany', 'Finland', 'USA', 'Singapore'], p: [0, 0, 4, 6] },
-            cpu: { t: 'CPU', o: ['2 Cores', '4 Cores', '8 Cores', '16 Cores'], p: [4, 8, 16, 32] },
-            ram: { t: 'RAM', o: ['4 GB', '8 GB', '16 GB', '32 GB'], p: [2, 4, 8, 16] },
-            ssd: { t: 'NVMe', o: ['40 GB', '80 GB', '160 GB', '320 GB'], p: [1.5, 3, 6, 12] },
-            soft: { t: 'Software', o: ['Clean OS', 'Docker', 'WireGuard VPN', 'Node.js Env'], p: [0, 1, 2, 1.5] },
-            lang: { t: 'Language', o: ['🇷🇺 Русский', '🇺🇸 English'] },
-            pay: { t: 'Top Up', o: ['Bank Card ($)', 'USDT Crypto', 'P2P Transfer'] }
-        };
-
-        let current = { loc: 0, cpu: 4, ram: 2, ssd: 1.5, soft: 0 };
+        tg.setHeaderColor('#050607');
 
         function switchView(id, idx) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
             document.getElementById('v-' + id).classList.add('active');
-            document.querySelectorAll('.nav-link')[idx].classList.add('active');
+            document.querySelectorAll('.nav-btn')[idx].classList.add('active');
         }
 
-        function openMod(id) {
-            const d = db[id];
-            tg.HapticFeedback.impactOccurred('medium');
-            let h = `<h3 style="text-align:center; margin-bottom:25px; color:var(--accent); font-size:18px;">${d.t}</h3>`;
-            d.o.forEach((o, i) => {
-                h += `<div class="opt" onclick="set('${id}', ${i})"><span>${o}</span><span>→</span></div>`;
+        function setSum(val) {
+            tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('custom-sum').value = val;
+            document.querySelectorAll('.pay-opt').forEach(opt => {
+                opt.classList.remove('active');
+                if(opt.innerText === '$'+val) opt.classList.add('active');
             });
-            document.getElementById('m-body').innerHTML = h;
-            document.getElementById('modal').style.display = 'flex';
-            setTimeout(() => document.getElementById('sheet').classList.add('up'), 10);
         }
 
-        function closeMod() {
-            document.getElementById('sheet').classList.remove('up');
-            setTimeout(() => document.getElementById('modal').style.display = 'none', 350);
-        }
-
-        function set(id, idx) {
-            tg.HapticFeedback.notificationOccurred('success');
-            const val = db[id].o[idx];
-            
-            if(id === 'lang') {
-                const isEn = val.includes('English');
-                document.getElementById('f').innerText = isEn ? '🇺🇸' : '🇷🇺';
-                document.getElementById('l').innerText = isEn ? 'EN' : 'RU';
-                updateLang(isEn ? 'en' : 'ru');
-            } else if(id !== 'pay') {
-                document.getElementById('r-'+id).innerText = val;
-                current[id] = db[id].p[idx];
-                calc();
-            }
-            closeMod();
-        }
-
-        function calc() {
-            const total = current.loc + current.cpu + current.ram + current.ssd + current.soft;
-            document.getElementById('total-price').innerText = `$${total.toFixed(2)}`;
-        }
-
-        function updateLang(lang) {
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if(i18n[lang][key]) el.innerText = i18n[lang][key];
+        // Базовая логика для модалок (заглушка)
+        function openMod(type) {
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showPopup({
+                title: 'Выбор параметра',
+                message: 'Выберите желаемую конфигурацию ' + type,
+                buttons: [{text: 'Понятно', type: 'close'}]
             });
         }
     </script>
