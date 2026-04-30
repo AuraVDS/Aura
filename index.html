@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS Core</title>
+    <title>Aura Cloud Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,33 +18,39 @@
             --text: #111827; --text-dim: #6b7280; --success: #059669;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; transition: all 0.2s ease; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+        
         .container { flex: 1; padding: 16px; padding-top: calc(10px + env(safe-area-inset-top)); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
 
-        header { display: flex; justify-content: space-between; align-items: center; }
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
         .logo { font-size: 20px; font-weight: 900; letter-spacing: 5px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header-actions { display: flex; gap: 8px; }
-        .icon-btn { background: var(--glass); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; }
-
-        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; cursor: pointer; }
-        .card:active { transform: scale(0.98); }
-        .section-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
-
-        .btn-topup { background: var(--accent); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 12px; width: 100%; margin-top: 10px; cursor: pointer; }
         
-        .view { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease; }
-        .view.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; cursor: pointer; position: relative; }
+        .card:active { transform: scale(0.97); background: rgba(59, 130, 246, 0.05); border-color: var(--accent); }
 
-        nav { background: var(--bg); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
+        .section-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; margin-bottom: 4px; }
+
+        .btn-action { background: var(--accent); color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 800; width: 100%; cursor: pointer; }
+        
+        /* --- VIEWS --- */
+        .view { display: none; flex-direction: column; gap: 15px; animation: slideUp 0.3s ease-out; }
+        .view.active { display: flex; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- NAV --- */
+        nav { background: var(--bg); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); backdrop-filter: blur(10px); }
         .n-link { flex: 1; text-align: center; opacity: 0.4; color: var(--text); cursor: pointer; }
         .n-link.active { opacity: 1; color: var(--accent); }
         .n-link i { font-size: 18px; display: block; margin-bottom: 4px; }
         .n-link span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
 
-        select { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px; border-radius: 10px; width: 100%; margin-top: 5px; outline: none; }
-        .badge { background: var(--accent); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        /* --- CONSTRUCTOR ELEMENTS --- */
+        .grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .select-item { background: var(--surface); border: 1px solid var(--border); padding: 12px; border-radius: 12px; font-size: 12px; text-align: center; font-weight: 600; }
+        .select-item.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+
+        input[type="range"] { width: 100%; accent-color: var(--accent); margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -52,87 +58,89 @@
     <div class="container">
         <header>
             <div class="logo">AURA</div>
-            <div class="header-actions">
-                <div class="icon-btn" onclick="toggleTheme()"><i class="fas fa-adjust"></i></div>
-                <div class="icon-btn" onclick="toggleLang()" id="lang-btn">RU</div>
+            <div style="display: flex; gap: 8px;">
+                <div onclick="toggleTheme()" style="padding: 8px; color: var(--accent);"><i class="fas fa-adjust"></i></div>
+                <div onclick="toggleLang()" id="lang-btn" style="font-weight: 800; color: var(--accent); padding: 8px;">RU</div>
             </div>
         </header>
 
         <div id="v-home" class="view active">
-            <div class="card">
-                <span class="section-label" data-key="h_bal">Balance</span>
-                <div style="font-size: 30px; font-weight: 900;" id="disp-bal">$0.00</div>
-                <button class="btn-topup" onclick="switchView('pay', 2)" data-key="h_btn_top">ПОПОЛНИТЬ БАЛАНС</button>
+            <div class="card" onclick="switchView('pay', 2)">
+                <span class="section-label" data-key="h_bal">Баланс</span>
+                <div style="font-size: 32px; font-weight: 900;" id="disp-bal">$0.00</div>
+                <div style="font-size: 11px; color: var(--accent); font-weight: 700; margin-top: 8px;">+ ПОПОЛНИТЬ СЧЕТ</div>
             </div>
 
             <div class="section-label" data-key="h_nodes">Мои Сервера</div>
             <div id="nodes-list"></div>
 
-            <div class="section-label" data-key="h_why">Почему Aura?</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="card" style="padding:12px; font-size:11px;">
-                    <i class="fas fa-bolt" style="color:var(--accent)"></i> <b data-key="w_1">Скорость</b>
-                    <p style="color:var(--text-dim)">NVMe диски 5Гбит/с</p>
-                </div>
-                <div class="card" style="padding:12px; font-size:11px;">
-                    <i class="fas fa-shield-alt" style="color:var(--accent)"></i> <b data-key="w_2">Защита</b>
-                    <p style="color:var(--text-dim)">DDoS-фильтрация L7</p>
+            <div class="section-label" data-key="h_market">Тарифы</div>
+            <div class="card" onclick="buyServer('Cloud Start', 7.50, '1 vCPU / 2GB RAM')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>Cloud Start</b><p style="font-size:10px; color:var(--text-dim)">Intel Core • 40GB NVMe</p></div>
+                    <b style="color:var(--accent)">$7.50</b>
                 </div>
             </div>
-
-            <div class="section-label" data-key="h_market">Тарифы (1.5x Value)</div>
-            <div class="card" onclick="buyServer('CX11 Start', 6.40, '1 vCPU / 2GB')">
-                <div style="display:flex; justify-content:space-between"><b>CX11 Start</b> <b style="color:var(--accent)">$6.40</b></div>
+            <div class="card" onclick="buyServer('Cloud Power', 14.90, '2 vCPU / 8GB RAM')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>Cloud Power</b><p style="font-size:10px; color:var(--text-dim)">AMD EPYC • 80GB NVMe</p></div>
+                    <b style="color:var(--accent)">$14.90</b>
+                </div>
             </div>
-            <div class="card" onclick="buyServer('CPX21 Power', 12.80, '2 vCPU / 4GB')">
-                <div style="display:flex; justify-content:space-between"><b>CPX21 Power</b> <b style="color:var(--accent)">$12.80</b></div>
-            </div>
-            <div class="card" onclick="buyServer('AX41 Dedicated', 45.00, '6 vCPU / 32GB')">
-                <div style="display:flex; justify-content:space-between"><b>AX41 Dedicated</b> <b style="color:var(--accent)">$45.00</b></div>
+            <div class="card" onclick="buyServer('Cloud Ultra', 29.90, '4 vCPU / 16GB RAM')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>Cloud Ultra</b><p style="font-size:10px; color:var(--text-dim)">Dedicated CPU • 160GB NVMe</p></div>
+                    <b style="color:var(--accent)">$29.90</b>
+                </div>
             </div>
         </div>
 
         <div id="v-build" class="view">
-            <h3 data-key="b_title">Конструктор</h3>
+            <h3 data-key="b_title">Создать VDS</h3>
+            
+            <div class="section-label">Конфигурация</div>
             <div class="card">
-                <div class="section-label">vCPU: <span id="cpu-val">2</span></div>
+                <div style="font-size:12px; margin-bottom:5px;">Процессор: <b id="cpu-val">2</b> Cores</div>
                 <input type="range" min="1" max="16" value="2" id="cpu-range" oninput="updatePrice()">
-                <div class="section-label">RAM (GB): <span id="ram-val">4</span></div>
-                <input type="range" min="1" max="64" value="4" id="ram-range" oninput="updatePrice()">
                 
-                <div class="section-label" style="margin-top:10px">Операционная система</div>
-                <select id="os-sel">
-                    <option value="Ubuntu 22.04">Ubuntu 22.04 LTS</option>
-                    <option value="Debian 11">Debian 11</option>
-                    <option value="Windows Server">Windows Server (+ $5)</option>
-                </select>
+                <div style="font-size:12px; margin-bottom:5px; margin-top:10px;">Память: <b id="ram-val">4</b> GB</div>
+                <input type="range" min="1" max="64" value="4" id="ram-range" oninput="updatePrice()">
             </div>
-            <div style="text-align:center">
+
+            <div class="section-label">Операционная система</div>
+            <div class="grid-select">
+                <div class="select-item active" onclick="setOS(this, 'Ubuntu')">Ubuntu</div>
+                <div class="select-item" onclick="setOS(this, 'Debian')">Debian</div>
+                <div class="select-item" onclick="setOS(this, 'CentOS')">CentOS</div>
+                <div class="select-item" onclick="setOS(this, 'Windows')">Windows</div>
+            </div>
+
+            <div style="margin-top:auto; text-align:center;">
                 <div style="font-size:32px; font-weight:900; color:var(--accent)" id="total-price">$0.00</div>
-                <button class="btn-topup" style="height:50px" onclick="deployCustom()" data-key="b_btn">Запустить сервер</button>
+                <button class="btn-action" onclick="deployCustom()" data-key="b_btn">Запустить сервер</button>
             </div>
         </div>
 
         <div id="v-info" class="view">
             <h3 data-key="n_i">База знаний</h3>
             <div class="card">
-                <h4 style="color:var(--accent)">Что такое VDS/VPS?</h4>
-                <p style="font-size:12px; color:var(--text-dim); margin-top:5px;">Это виртуальный выделенный сервер. Вы получаете полную мощность части физического сервера с собственной ОС и IP.</p>
+                <h4 style="color:var(--accent)">Что такое VDS?</h4>
+                <p style="font-size:12px; color:var(--text-dim); margin-top:5px;">Это ваш личный компьютер в облаке. Вы можете устанавливать любые программы, запускать сайты или боты 24/7.</p>
             </div>
             <div class="card">
-                <h4 style="color:var(--accent)">Зачем нужно Облако?</h4>
-                <p style="font-size:12px; color:var(--text-dim); margin-top:5px;">Для хостинга сайтов, игровых серверов, ботов или удаленной работы. Масштабируйте ресурсы в пару кликов.</p>
+                <h4 style="color:var(--accent)">Как пользоваться?</h4>
+                <p style="font-size:12px; color:var(--text-dim); margin-top:5px;">После запуска вы получите IP и пароль. Подключитесь через SSH (для Linux) или Удаленный рабочий стол (для Windows).</p>
             </div>
             <div class="card" onclick="tg.openTelegramLink('https://t.me/aura_support')">
-                <h4 data-key="i_supp">Нужна помощь?</h4>
-                <p style="font-size:12px; color:var(--text-dim); margin-top:5px;">Нажми здесь, чтобы написать в поддержку.</p>
+                <h4 data-key="i_supp">Помощь</h4>
+                <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">Напишите нам, если возникли вопросы.</p>
             </div>
         </div>
 
         <div id="v-pay" class="view">
             <h3 data-key="p_title">Пополнение</h3>
-            <input type="number" id="pay-amt" placeholder="10.00" style="background:var(--surface); border:1px solid var(--border); padding:15px; border-radius:12px; color:var(--text); width:100%; text-align:center;">
-            <button class="btn-topup" onclick="addFunds()" data-key="p_btn">Оплатить</button>
+            <input type="number" id="pay-amt" placeholder="10.00" style="background:var(--surface); border:1px solid var(--border); padding:18px; border-radius:15px; color:var(--text); width:100%; text-align:center; font-size:20px;">
+            <button class="btn-action" style="margin-top:10px;" onclick="addFunds()" data-key="p_btn">Оплатить через Crypto</button>
         </div>
     </div>
 
@@ -144,43 +152,62 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        let balance = 0.00, servers = [], lang = 'ru', theme = 'dark';
+        let balance = 0.00, servers = [], lang = 'ru', theme = 'dark', selectedOS = 'Ubuntu';
 
         const i18n = {
-            ru: { h_bal: "Баланс", h_btn_top: "ПОПОЛНИТЬ БАЛАНС", h_nodes: "Мои Сервера", h_why: "Почему Aura?", h_market: "Тарифы (1.5x Value)", w_1: "Скорость", w_2: "Защита", b_title: "Конструктор", b_btn: "Запустить сервер", n_h: "Сервера", n_b: "Создать", n_i: "Вики", p_title: "Пополнение", p_btn: "Оплатить", empty: "Серверов пока нет" },
-            en: { h_bal: "Balance", h_btn_top: "TOP UP BALANCE", h_nodes: "My Servers", h_why: "Why Aura?", h_market: "Plans (1.5x Value)", w_1: "Fast", w_2: "Secure", b_title: "Builder", b_btn: "Deploy Server", n_h: "Servers", n_b: "Build", n_i: "Wiki", p_title: "Recharge", p_btn: "Pay Now", empty: "No servers yet" }
+            ru: { h_bal: "Баланс", h_nodes: "Мои Сервера", h_market: "Тарифы", b_title: "Создать VDS", b_btn: "Запустить сервер", n_h: "Сервера", n_b: "Создать", n_i: "Вики", p_title: "Пополнение", p_btn: "Оплатить", empty: "Серверов нет", i_supp: "Поддержка" },
+            en: { h_bal: "Balance", h_nodes: "My Servers", h_market: "Plans", b_title: "Deploy VDS", b_btn: "Deploy Server", n_h: "Servers", n_b: "Build", n_i: "Wiki", p_title: "Recharge", p_btn: "Pay", empty: "No servers", i_supp: "Support" }
         };
 
         function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); tg.HapticFeedback.impactOccurred('light'); }
         function toggleLang() { lang = lang === 'ru' ? 'en' : 'ru'; document.getElementById('lang-btn').innerText = lang.toUpperCase(); updateUI(); }
         function switchView(id, idx) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active')); document.getElementById('v-'+id).classList.add('active'); document.querySelectorAll('.n-link')[idx].classList.add('active'); tg.HapticFeedback.selectionChanged(); }
         
+        function setOS(el, os) {
+            document.querySelectorAll('.select-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            selectedOS = os;
+            tg.HapticFeedback.selectionChanged();
+        }
+
         function updatePrice() {
             const cpu = document.getElementById('cpu-range').value, ram = document.getElementById('ram-range').value;
             document.getElementById('cpu-val').innerText = cpu; document.getElementById('ram-val').innerText = ram;
-            const total = ((cpu * 2.5 + ram * 1.2) * 1.5).toFixed(2);
-            document.getElementById('total-price').innerText = `$${total}`; return total;
+            const price = ((cpu * 3.2 + ram * 1.5) * 1.5).toFixed(2);
+            document.getElementById('total-price').innerText = `$${price}`;
+            return price;
         }
 
-        function addFunds() { const val = parseFloat(document.getElementById('pay-amt').value); if(val > 0) { balance += val; updateUI(); switchView('home', 0); tg.HapticFeedback.notificationOccurred('success'); } }
-        
+        function addFunds() {
+            const val = parseFloat(document.getElementById('pay-amt').value);
+            if(val > 0) { balance += val; updateUI(); switchView('home', 0); tg.HapticFeedback.notificationOccurred('success'); }
+        }
+
         function buyServer(name, price, specs) {
-            if(balance < price) { tg.showAlert("Insufficient funds!"); return; }
-            balance -= price;
-            servers.push({ name, specs, ip: `185.10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}` });
-            updateUI(); tg.HapticFeedback.notificationOccurred('success');
+            tg.showConfirm(`${lang === 'ru' ? 'Запустить' : 'Deploy'} ${name} ($${price})?`, (yes) => {
+                if(yes) {
+                    if(balance < price) { tg.showAlert(lang === 'ru' ? "Недостаточно средств!" : "Insufficient funds!"); return; }
+                    balance -= price;
+                    servers.push({ name, specs, ip: `185.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}` });
+                    updateUI();
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            });
         }
 
-        function deployCustom() { const p = parseFloat(updatePrice()); buyServer('Custom VDS', p, `${document.getElementById('cpu-val').innerText} vCPU / ${document.getElementById('os-sel').value}`); }
+        function deployCustom() {
+            const p = parseFloat(updatePrice());
+            buyServer('Custom Instance', p, `${document.getElementById('cpu-val').innerText} vCPU / ${selectedOS}`);
+        }
 
         function updateUI() {
             document.getElementById('disp-bal').innerText = `$${balance.toFixed(2)}`;
             document.querySelectorAll('[data-key]').forEach(el => { const k = el.getAttribute('data-key'); if(i18n[lang][k]) el.innerText = i18n[lang][k]; });
             const list = document.getElementById('nodes-list');
             list.innerHTML = servers.length === 0 ? `<p style="text-align:center;color:var(--text-dim);font-size:12px;padding:10px;">${i18n[lang].empty}</p>` : 
-                servers.map(s => `<div class="card" style="margin-bottom:10px; border-left:3px solid var(--accent); padding:15px;">
+                servers.map(s => `<div class="card" style="margin-bottom:10px; border-left:4px solid var(--accent); padding:12px 15px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><h4 style="font-size:14px">${s.name}</h4><code style="color:var(--accent); font-size:10px;">${s.ip}</code></div>
+                        <div><h4 style="font-size:14px">${s.name}</h4><code style="color:var(--accent); font-size:11px;">${s.ip}</code></div>
                         <span style="color:var(--success); font-size:9px; font-weight:800;">● ONLINE</span>
                     </div>
                 </div>`).join('');
