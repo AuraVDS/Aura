@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS Enterprise</title>
+    <title>Aura OS Ultima</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -12,164 +12,137 @@
             --surface: #0a0b0d;
             --glass: rgba(255, 255, 255, 0.03);
             --accent: #3b82f6;
-            --border: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
             --text: #f8fafc;
             --text-dim: #64748b;
             --success: #10b981;
+            --warning: #f59e0b;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, "SF Pro Display", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: var(--bg); color: var(--text);
             height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .container { flex: 1; padding: 16px; padding-top: calc(10px + env(safe-area-inset-top)); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .container { flex: 1; padding: 16px; padding-top: calc(10px + env(safe-area-inset-top)); overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
 
-        /* --- HEADER --- */
-        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
-        .logo { font-size: 18px; font-weight: 800; letter-spacing: 5px; background: linear-gradient(135deg, #fff 0%, #64748b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .lang-btn { background: var(--glass); border: 1px solid var(--border); padding: 6px 12px; border-radius: 12px; font-size: 10px; font-weight: 800; color: var(--accent); }
-
-        /* --- CARDS --- */
+        /* --- UI COMPONENTS --- */
         .card { 
-            background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 18px; 
-            transition: 0.2s ease; cursor: pointer; backdrop-filter: blur(10px);
+            background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 20px; 
+            backdrop-filter: blur(20px); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
         }
-        .card:active { transform: scale(0.97); border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
+        .card:active { transform: scale(0.98); border-color: var(--accent); }
 
-        .section-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin: 15px 0 5px 5px; font-weight: 700; }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: 6px; background: linear-gradient(to right, #fff, var(--text-dim)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; margin-left: 5px; }
 
-        /* --- BALANCES --- */
-        .bal-val { font-size: 34px; font-weight: 800; margin-top: 4px; }
+        /* --- SERVERS LOGIC --- */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .status-active { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulse 2s infinite; }
+        .status-process { background: var(--warning); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* --- WIKI STYLES --- */
-        .wiki-card { margin-bottom: 10px; border-left: 2px solid var(--accent); border-radius: 8px 20px 20px 8px; }
-        .wiki-card h4 { font-size: 14px; color: var(--accent); margin-bottom: 6px; }
-        .wiki-card p { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+        .terminal { 
+            background: #000; font-family: monospace; font-size: 10px; color: #10b981; 
+            padding: 12px; border-radius: 12px; margin-top: 15px; display: none; border: 1px solid #1a1a1a;
+        }
+
+        /* --- CONSTRUCTOR --- */
+        .conf-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .conf-row:last-child { border: none; }
+        .conf-row b { color: var(--accent); }
+
+        /* --- NAVIGATION --- */
+        nav { background: rgba(2,2,3,0.8); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); }
+        .n-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; color: #fff; transition: 0.3s; cursor: pointer; }
+        .n-link.active { opacity: 1; color: var(--accent); }
+        .n-link i { font-size: 20px; margin-bottom: 4px; }
+        .n-link span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
         /* --- VIEWS --- */
-        .view { display: none; flex-direction: column; gap: 10px; animation: fadeIn 0.3s ease; }
+        .view { display: none; flex-direction: column; gap: 15px; animation: slideUp 0.4s ease; }
         .view.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- NAV --- */
-        nav { background: rgba(2, 2, 3, 0.95); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(12px + env(safe-area-inset-bottom)); }
-        .n-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; color: #fff; }
-        .n-link.active { opacity: 1; color: var(--accent); }
-        .n-link i { font-size: 18px; margin-bottom: 4px; }
-        .n-link span { font-size: 9px; font-weight: 700; text-transform: uppercase; }
-
-        .btn-prime { background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; margin-top: auto; }
+        .btn-main { background: var(--accent); color: #fff; border: none; padding: 20px; border-radius: 20px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        input[type="number"] { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; color: #fff; font-size: 18px; width: 100%; outline: none; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>
-            <div class="logo">AURA OS</div>
-            <div class="lang-btn" onclick="toggleLang()">RU</div>
+        <header style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="logo">AURA</div>
+            <div id="top-bal" style="font-weight:900; color:var(--accent); background:var(--glass); padding:6px 12px; border-radius:12px; font-size:12px;">$0.00</div>
         </header>
 
         <div id="v-home" class="view active">
-            <div class="card" onclick="switchView('pay', 2)">
-                <span class="section-label" style="margin:0" data-key="h_bal">Balance</span>
-                <div class="bal-val" id="disp-bal">$0.00</div>
-                <span style="color:var(--accent); font-size:10px; font-weight:800; margin-top:10px; display:block;" data-key="h_add">TOP UP →</span>
-            </div>
+            <div class="section-label">Active Instances</div>
+            <div id="my-servers-container" style="display:flex; flex-direction:column; gap:12px;">
+                </div>
 
-            <div class="section-label" data-key="h_pop">Ready Solutions</div>
+            <div class="section-label">Quick Buy</div>
+            <div class="card" onclick="buyServer('Starter CPX', 6.80, '2 vCPU / 2GB / 40GB')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><h4>Starter CPX</h4><p style="font-size:11px; color:var(--text-dim)">Hetzner CPX11 • DE/FI</p></div>
+                    <div style="text-align:right"><b style="color:var(--accent)">$6.80</b><p style="font-size:9px">/mo</p></div>
+                </div>
+            </div>
             
-            <div class="card" onclick="processPurchase('Starter Cloud', 6.50)">
+            <div class="card" onclick="buyServer('Power CPX', 14.20, '3 vCPU / 4GB / 80GB')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h4 style="font-size:15px">Starter Cloud</h4>
-                        <p style="font-size:11px; color:var(--text-dim)">2 vCPU • 2GB RAM • 40GB SSD</p>
-                    </div>
-                    <div style="text-align:right">
-                        <b style="color:var(--accent)">$6.50</b>
-                        <p style="font-size:9px; color:var(--text-dim)">/mo</p>
-                    </div>
+                    <div><h4>Power CPX</h4><p style="font-size:11px; color:var(--text-dim)">Hetzner CPX21 • DE/FI</p></div>
+                    <div style="text-align:right"><b style="color:var(--accent)">$14.20</b><p style="font-size:9px">/mo</p></div>
                 </div>
-            </div>
-
-            <div class="card" onclick="processPurchase('Pro Node', 13.50)">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h4 style="font-size:15px">Pro Node</h4>
-                        <p style="font-size:11px; color:var(--text-dim)">3 vCPU • 4GB RAM • 80GB SSD</p>
-                    </div>
-                    <div style="text-align:right">
-                        <b style="color:var(--accent)">$13.50</b>
-                        <p style="font-size:9px; color:var(--text-dim)">/mo</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-label" data-key="h_stat">Network Status</div>
-            <div class="card" style="padding:12px; display:flex; justify-content:space-between;">
-                <span style="font-size:12px; color:var(--success)"><i class="fas fa-check-circle"></i> All Systems Operational</span>
-                <span style="font-size:12px; color:var(--text-dim)">99.9% Uptime</span>
             </div>
         </div>
 
         <div id="v-build" class="view">
-            <h3 data-key="b_title">Custom Build</h3>
+            <h3 style="margin-left:5px">Configurator</h3>
             <div class="card">
-                <div style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;" onclick="tg.showAlert('Select CPU')">
-                    <span>vCPU</span> <b id="r-cpu" style="color:var(--accent)">2 Cores</b>
-                </div>
-                <div style="padding:10px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;" onclick="tg.showAlert('Select RAM')">
-                    <span>Memory</span> <b id="r-ram" style="color:var(--accent)">4 GB</b>
-                </div>
-                <div style="padding:10px 0; display:flex; justify-content:space-between;" onclick="tg.showAlert('Select SSD')">
-                    <span>SSD Space</span> <b id="r-ssd" style="color:var(--accent)">40 GB</b>
-                </div>
+                <div class="conf-row" onclick="tg.showAlert('CPU: AMD EPYC 2nd Gen')"><span>vCPU</span><b>2 Cores</b></div>
+                <div class="conf-row" onclick="tg.showAlert('RAM: DDR4 ECC')"><span>RAM</span><b>4 GB</b></div>
+                <div class="conf-row" onclick="tg.showAlert('Disk: NVMe RAID10')"><span>SSD NVMe</span><b>40 GB</b></div>
+                <div class="conf-row" onclick="tg.showAlert('Default: Germany (Falkenstein)')"><span>Location</span><b>Germany</b></div>
             </div>
-            <div style="margin-top:auto; text-align:center; padding:20px;">
-                <p style="font-size:11px; color:var(--text-dim)">Monthly Estimate</p>
-                <div class="bal-val" id="total-price" style="margin-bottom:15px">$7.50</div>
-                <button class="btn-prime" onclick="processPurchase('Custom Build', 7.50)" data-key="b_btn">Deploy Now</button>
+            <div style="margin-top:auto; text-align:center;">
+                <span class="section-label">Total per month</span>
+                <div style="font-size:36px; font-weight:900; margin:10px 0;">$8.50</div>
+                <button class="btn-main" style="width:100%" onclick="buyServer('Custom Instance', 8.50, '2 vCPU / 4GB / 40GB')">Deploy Infrastructure</button>
             </div>
         </div>
 
         <div id="v-pay" class="view">
-            <h3 data-key="p_title">Wallet</h3>
-            <div class="card">
-                <span class="section-label" style="margin:0">Available Funds</span>
-                <div class="bal-val" id="wallet-bal">$0.00</div>
+            <h3>Wallet & Billing</h3>
+            <div class="card" style="text-align:center">
+                <span class="section-label">Your Balance</span>
+                <div id="wallet-bal-val" style="font-size:42px; font-weight:900; margin-top:5px;">$0.00</div>
             </div>
-            <div class="section-label">Top up amount ($)</div>
-            <input type="number" id="pay-sum" placeholder="0.00" style="width:100%; padding:20px; border-radius:15px; background:var(--surface); border:1px solid var(--border); color:#fff; font-size:18px; outline:none;">
-            <button class="btn-prime" onclick="addFunds()">Continue to Payment</button>
+            <div class="section-label">Enter Amount</div>
+            <input type="number" id="pay-input" placeholder="0.00">
+            <button class="btn-main" onclick="addMoney()">Add Funds</button>
         </div>
 
-        <div id="v-info" class="view">
-            <h3 data-key="i_title">Aura Wiki</h3>
-            
-            <div class="card wiki-card" onclick="tg.showAlert('Aura VDS uses AMD EPYC™ processors and NVMe storage for maximum speed.')">
-                <h4 data-key="w1_t">What is Aura VDS?</h4>
-                <p data-key="w1_d">Premium infrastructure based on Hetzner Enterprise nodes, optimized for high load and low latency.</p>
+        <div id="v-wiki" class="view">
+            <h3>Aura Knowledge Base</h3>
+            <div class="card" onclick="tg.showAlert('Aura uses x1.5 multiplier on Hetzner Cloud prices to cover management and support.')">
+                <h4 style="color:var(--accent)">Pricing Policy</h4>
+                <p style="font-size:12px; color:var(--text-dim); margin-top:6px;">All servers are billed monthly. Prices are based on Hetzner Enterprise nodes.</p>
             </div>
-
-            <div class="card wiki-card" onclick="tg.showAlert('Your data is protected by AES-256 encryption and daily backups.')">
-                <h4 data-key="w2_t">Security First</h4>
-                <p data-key="w2_d">We provide isolated environments for every client with hardware-level protection.</p>
-            </div>
-
-            <div class="card wiki-card" onclick="tg.openTelegramLink('https://t.me/aura_support')">
-                <h4 data-key="w3_t">Support 24/7</h4>
-                <p data-key="w3_d">Our engineers are always online to help with server migration and setup.</p>
+            <div class="card" onclick="tg.showAlert('Servers are deployed in Frankfurt (DE) or Helsinki (FI) by default.')">
+                <h4 style="color:var(--accent)">Infrastructure</h4>
+                <p style="font-size:12px; color:var(--text-dim); margin-top:6px;">We use AMD EPYC™ processors and enterprise-grade NVMe storage.</p>
             </div>
         </div>
     </div>
 
     <nav>
-        <div class="n-link active" onclick="switchView('home',0)"><i class="fas fa-layer-group"></i><span data-key="n_h">Home</span></div>
-        <div class="n-link" onclick="switchView('build',1)"><i class="fas fa-sliders-h"></i><span data-key="n_b">Build</span></div>
-        <div class="n-link" onclick="switchView('pay',2)"><i class="fas fa-wallet"></i><span data-key="n_p">Wallet</span></div>
-        <div class="n-link" onclick="switchView('info',3)"><i class="fas fa-book"></i><span data-key="n_i">Wiki</span></div>
+        <div class="n-link active" onclick="switchView('home', 0)"><i class="fas fa-th-large"></i><span>Nodes</span></div>
+        <div class="n-link" onclick="switchView('build', 1)"><i class="fas fa-tools"></i><span>Build</span></div>
+        <div class="n-link" onclick="switchView('pay', 2)"><i class="fas fa-wallet"></i><span>Pay</span></div>
+        <div class="n-link" onclick="switchView('wiki', 3)"><i class="fas fa-book"></i><span>Wiki</span></div>
     </nav>
 
     <script>
@@ -178,86 +151,110 @@
         tg.setHeaderColor('#020203');
 
         let balance = 0.00;
-        let lang = 'en';
-
-        const i18n = {
-            ru: {
-                h_bal: "Баланс", h_add: "ПОПОЛНИТЬ →", h_pop: "Готовые решения", h_stat: "Статус сети",
-                b_title: "Конфигуратор", b_btn: "Запустить сервер", p_title: "Кошелек", i_title: "Aura Wiki",
-                w1_t: "Что такое Aura VDS?", w1_d: "Премиальная инфраструктура на базе Hetzner Enterprise, оптимизированная под нагрузки.",
-                w2_t: "Безопасность", w2_d: "Изолированные среды с шифрованием AES-256 и ежедневными бэкапами.",
-                w3_t: "Поддержка 24/7", w3_d: "Инженеры всегда на связи для помощи с миграцией и настройкой.",
-                n_h: "Главная", n_b: "Сборка", n_p: "Кошелек", n_i: "Вики"
-            },
-            en: {
-                h_bal: "Balance", h_add: "TOP UP →", h_pop: "Ready Solutions", h_stat: "Network Status",
-                b_title: "Custom Build", b_btn: "Deploy Now", p_title: "Wallet", i_title: "Aura Wiki",
-                w1_t: "What is Aura VDS?", w1_d: "Premium infrastructure based on Hetzner Enterprise nodes, optimized for load.",
-                w2_t: "Security First", w2_d: "Isolated environments with AES-256 encryption and daily backups.",
-                w3_t: "Support 24/7", w3_d: "Our engineers are always online to help with migration.",
-                n_h: "Home", n_b: "Build", n_p: "Wallet", n_i: "Wiki"
-            }
-        };
-
-        function toggleLang() {
-            lang = lang === 'en' ? 'ru' : 'en';
-            document.querySelector('.lang-btn').innerText = lang.toUpperCase();
-            updateLangUI();
-        }
-
-        function updateLangUI() {
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if(i18n[lang][key]) el.innerText = i18n[lang][key];
-            });
-        }
+        let servers = [];
 
         function switchView(id, idx) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active'));
-            document.getElementById('v-'+id).classList.add('active');
+            document.getElementById('v-' + id).classList.add('active');
             document.querySelectorAll('.n-link')[idx].classList.add('active');
-        }
-
-        function addFunds() {
-            const val = parseFloat(document.getElementById('pay-sum').value);
-            if(!val || val <= 0) return;
-            tg.showConfirm(`Top up balance by $${val.toFixed(2)}?`, (yes) => {
-                if(yes) {
-                    balance += val;
-                    updateUI();
-                    switchView('home', 0);
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-            });
-        }
-
-        function processPurchase(name, price) {
-            tg.HapticFeedback.impactOccurred('medium');
-            if(balance < price) {
-                tg.showConfirm(`Insufficient funds for ${name}. Price: $${price}. Top up?`, (yes) => {
-                    if(yes) switchView('pay', 2);
-                });
-            } else {
-                tg.showConfirm(`Confirm purchase of ${name} for $${price}?`, (yes) => {
-                    if(yes) {
-                        balance -= price;
-                        updateUI();
-                        tg.showAlert("Success! Your instance is deploying.");
-                        tg.HapticFeedback.notificationOccurred('success');
-                    }
-                });
-            }
         }
 
         function updateUI() {
             const b = `$${balance.toFixed(2)}`;
-            document.getElementById('disp-bal').innerText = b;
-            document.getElementById('wallet-bal').innerText = b;
+            document.getElementById('top-bal').innerText = b;
+            document.getElementById('wallet-bal-val').innerText = b;
+            renderServers();
         }
 
-        updateLangUI();
+        function addMoney() {
+            const val = parseFloat(document.getElementById('pay-input').value);
+            if(!val || val <= 0) return;
+            tg.showConfirm(`Confirm deposit of $${val.toFixed(2)}?`, (yes) => {
+                if(yes) {
+                    balance += val;
+                    updateUI();
+                    tg.HapticFeedback.notificationOccurred('success');
+                    switchView('home', 0);
+                }
+            });
+        }
+
+        function buyServer(name, price, specs) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            if(balance < price) {
+                tg.showConfirm("Insufficient funds. Go to wallet?", (y) => { if(y) switchView('pay', 2); });
+                return;
+            }
+
+            tg.showConfirm(`Deploy ${name} for $${price}?`, (yes) => {
+                if(yes) {
+                    balance -= price;
+                    const newSrv = {
+                        id: Math.random().toString(36).substr(2, 9),
+                        name: name,
+                        specs: specs,
+                        ip: `116.203.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+                        status: 'creating'
+                    };
+                    servers.push(newSrv);
+                    updateUI();
+                    switchView('home', 0);
+
+                    setTimeout(() => {
+                        newSrv.status = 'active';
+                        updateUI();
+                        tg.HapticFeedback.notificationOccurred('success');
+                    }, 4000);
+                }
+            });
+        }
+
+        function renderServers() {
+            const container = document.getElementById('my-servers-container');
+            if(servers.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-dim); font-size:12px;">No active nodes found</div>`;
+                return;
+            }
+
+            container.innerHTML = servers.map(s => `
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div style="display:flex; align-items:center;">
+                                <span class="status-dot ${s.status === 'active' ? 'status-active' : 'status-process'}"></span>
+                                <h4 style="font-size:15px">${s.name}</h4>
+                            </div>
+                            <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">${s.specs}</p>
+                            <code style="font-size:12px; color:var(--accent); margin-top:8px; display:block;">${s.ip}</code>
+                        </div>
+                        <div style="text-align:right">
+                            <span style="font-size:10px; color:var(--text-dim)">${s.status === 'active' ? 'Running' : 'Deploying...'}</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                        <button onclick="toggleTerminal('${s.id}')" style="background:var(--glass); border:1px solid var(--border); color:#fff; padding:8px; border-radius:10px;"><i class="fas fa-terminal"></i></button>
+                        <button onclick="tg.showAlert('Rebooting node...')" style="background:var(--glass); border:1px solid var(--border); color:#fff; padding:8px; border-radius:10px;"><i class="fas fa-sync"></i></button>
+                        <button onclick="tg.showAlert('Snaphost saved!')" style="background:var(--glass); border:1px solid var(--border); color:#fff; padding:8px; border-radius:10px;"><i class="fas fa-save"></i></button>
+                    </div>
+                    <div id="term-${s.id}" class="terminal">
+                        > root@aura-cloud:~# apt update<br>
+                        > Hit:1 http://deb.debian.org/debian bullseye InRelease<br>
+                        > Reading package lists... Done<br>
+                        > <span style="animation: pulse 0.5s infinite">_</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTerminal(id) {
+            const el = document.getElementById(`term-${id}`);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        updateUI();
     </script>
 </body>
 </html>
