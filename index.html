@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS v13</title>
+    <title>Aura OS v14</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #050607;
-            --surface: #0f1114;
-            --accent: #b3e5fc;
-            --border: rgba(179, 229, 252, 0.08);
-            --card: rgba(255, 255, 255, 0.02);
-            --text: #eef2f6;
+            --bg: #050608;
+            --surface: #0f1216;
+            --accent: #a5d8ff;
+            --border: rgba(165, 216, 255, 0.1);
+            --card: rgba(255, 255, 255, 0.03);
+            --text: #f1f5f9;
             --text-dim: #64748b;
         }
 
@@ -24,175 +24,240 @@
             height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .container { flex: 1; padding: 20px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; overflow-y: auto; position: relative; }
-        
-        /* Фоновый декор чтобы не было пусто */
-        .aura-bg { position: absolute; top: -10%; right: -10%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(179, 229, 252, 0.05) 0%, transparent 70%); z-index: 0; pointer-events: none; }
+        .container { flex: 1; padding: 15px; padding-top: calc(10px + env(safe-area-inset-top)); display: flex; flex-direction: column; overflow-y: auto; }
 
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; z-index: 1; }
-        .logo { font-size: 18px; font-weight: 900; letter-spacing: 6px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-size: 18px; font-weight: 900; letter-spacing: 5px; color: var(--accent); }
 
-        /* --- DASHBOARD --- */
-        .bento-main { display: grid; gap: 15px; z-index: 1; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 26px; padding: 20px; transition: 0.3s; }
+        /* --- КЛИКАБЕЛЬНЫЕ КАРТОЧКИ --- */
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; 
+            margin-bottom: 12px; transition: all 0.2s ease; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .card:active { transform: scale(0.97); background: rgba(165, 216, 255, 0.05); border-color: var(--accent); }
+
+        .bal-val { font-size: 32px; font-weight: 800; margin-top: 5px; }
+
+        /* --- ПОПУЛЯРНЫЕ ВЫБОРЫ --- */
+        .section-title { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin: 15px 0 10px 5px; font-weight: 700; }
         
-        .bal-display { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #0f1114 0%, #050607 100%); }
-        .bal-val { font-size: 32px; font-weight: 800; color: var(--accent); }
+        .vds-card { display: flex; justify-content: space-between; align-items: center; }
+        .vds-info h4 { font-size: 15px; margin-bottom: 4px; }
+        .vds-info p { font-size: 11px; color: var(--text-dim); }
+        .vds-price { text-align: right; }
+        .vds-price b { display: block; color: var(--accent); font-size: 16px; }
+        .vds-price span { font-size: 9px; color: var(--text-dim); }
 
         /* --- VIEWS --- */
-        .view { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.4s ease; }
+        .view { display: none; flex-direction: column; animation: slideUp 0.3s ease; }
         .view.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- PAYMENT MENU --- */
-        .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-        .pay-opt { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 16px; text-align: center; font-weight: 700; }
-        .pay-opt.active { border-color: var(--accent); color: var(--accent); background: rgba(179, 229, 252, 0.05); }
-        .input-sum { background: var(--surface); border: 1px solid var(--border); padding: 18px; border-radius: 18px; color: #fff; width: 100%; font-size: 16px; outline: none; margin-bottom: 10px; }
-
-        /* --- WIKI / INFO --- */
-        .wiki-item { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 10px; }
-        .wiki-item h4 { color: var(--accent); margin-bottom: 5px; font-size: 14px; }
-        .wiki-item p { font-size: 13px; color: var(--text-dim); line-height: 1.4; }
+        /* --- ПОПОЛНЕНИЕ --- */
+        .sum-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .sum-btn { background: var(--surface); border: 1px solid var(--border); padding: 15px; border-radius: 16px; text-align: center; font-weight: 800; font-size: 14px; transition: 0.2s; }
+        .sum-btn:active, .sum-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(165, 216, 255, 0.05); }
+        
+        .input-area { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        input { background: transparent; border: none; color: #fff; width: 100%; font-size: 20px; font-weight: 700; outline: none; }
 
         /* --- NAV --- */
-        nav { background: rgba(5, 6, 7, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 12px 0 calc(15px + env(safe-area-inset-bottom)); }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.2s; }
-        .nav-btn.active { opacity: 1; color: var(--accent); }
-        .nav-btn i { font-size: 18px; margin-bottom: 5px; }
-        .nav-btn span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        nav { background: rgba(5, 6, 8, 0.96); backdrop-filter: blur(15px); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.3; transition: 0.3s; }
+        .nav-link.active { opacity: 1; color: var(--accent); }
+        .nav-link i { font-size: 18px; margin-bottom: 5px; }
+        .nav-link span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
-        .btn-action { background: var(--accent); color: #000; border: none; padding: 20px; border-radius: 22px; font-weight: 900; text-transform: uppercase; width: 100%; cursor: pointer; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 20px; border-radius: 22px; font-weight: 900; text-transform: uppercase; width: 100%; margin-top: auto; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="aura-bg"></div>
         <header>
-            <div class="logo">AURA</div>
-            <div style="font-size: 12px; font-weight: 700; color: var(--text-dim);">v13.0</div>
+            <div class="logo" onclick="location.reload()">AURA</div>
+            <div class="card" style="margin:0; padding: 8px 15px; border-radius: 12px;" onclick="switchView('pay', 2)">
+                <span id="header-bal" style="font-weight: 800; color: var(--accent);">$0.00</span>
+            </div>
         </header>
 
         <div id="v-home" class="view active">
-            <div class="card bal-display">
-                <div>
-                    <p style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">Ваш баланс</p>
-                    <p class="bal-val" id="main-bal">$0.00</p>
-                </div>
-                <i class="fas fa-wallet" style="font-size: 24px; opacity: 0.2;"></i>
+            <div class="card" onclick="switchView('pay', 2)">
+                <p style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Общий Баланс</p>
+                <div class="bal-val" id="main-bal">$0.00</div>
+                <div style="margin-top: 15px; font-size: 11px; color: var(--accent); font-weight: 700;">ПОПОЛНИТЬ +</div>
             </div>
 
-            <div id="status-area">
-                <div class="card" style="text-align: center; border-style: dashed; padding: 40px 20px;">
-                    <p style="color: var(--text-dim); font-size: 13px;">Серверы не найдены</p>
-                    <p style="font-size: 11px; color: rgba(179, 229, 252, 0.4); margin-top: 5px;">Создайте конфигурацию в разделе «Купить»</p>
+            <div class="section-title">Популярные решения</div>
+            
+            <div class="card vds-card" onclick="buyVDS('Starter', 5.50)">
+                <div class="vds-info">
+                    <h4>Starter Cloud</h4>
+                    <p>2 vCPU • 4GB RAM • 40GB NVMe</p>
+                </div>
+                <div class="vds-price">
+                    <b>$5.50</b>
+                    <span>в месяц</span>
                 </div>
             </div>
 
-            <div class="card" style="background: transparent; border: none; padding: 10px;">
-                <p style="font-size: 11px; color: var(--text-dim); line-height: 1.6;">
-                    <i class="fas fa-shield-halved" style="margin-right: 5px;"></i> Система защиты Aura Shield активна. Ваши данные шифруются по стандарту AES-256.
-                </p>
+            <div class="card vds-card" onclick="buyVDS('Trading Pro', 12.00)">
+                <div class="vds-info">
+                    <h4>Trading Pro</h4>
+                    <p>4 vCPU • 8GB RAM • 80GB NVMe</p>
+                </div>
+                <div class="vds-price">
+                    <b>$12.00</b>
+                    <span>в месяц</span>
+                </div>
+            </div>
+
+            <div class="card vds-card" onclick="buyVDS('Ultra Node', 28.50)">
+                <div class="vds-info">
+                    <h4>Ultra Node</h4>
+                    <p>8 vCPU • 16GB RAM • 160GB NVMe</p>
+                </div>
+                <div class="vds-price">
+                    <b>$28.50</b>
+                    <span>в месяц</span>
+                </div>
+            </div>
+
+            <div class="card" style="border: 1px dashed var(--border); text-align: center;" onclick="switchView('build', 1)">
+                <span style="font-size: 13px; color: var(--text-dim);">Своя конфигурация →</span>
             </div>
         </div>
 
         <div id="v-build" class="view">
-            <h3 style="margin-bottom: 10px;">Конфигуратор</h3>
-            <div class="card" onclick="openMod('loc')" style="display: flex; justify-content: space-between;">
-                <span>Локация</span> <b id="r-loc" style="color: var(--accent);">Германия</b>
+            <h3 style="margin-bottom: 15px;">Создать сервер</h3>
+            <div class="card" onclick="tg.showAlert('Выбор локации...')">
+                <span class="section-title" style="margin:0; padding:0;">Локация</span>
+                <p style="margin-top:5px; font-weight:700;">Германия, Франкфурт</p>
             </div>
-            <div class="card" onclick="openMod('cpu')" style="display: flex; justify-content: space-between;">
-                <span>Процессор</span> <b id="r-cpu" style="color: var(--accent);">2 Cores</b>
+            <div class="card" onclick="tg.showAlert('Настройка CPU...')">
+                <span class="section-title" style="margin:0; padding:0;">Процессор</span>
+                <p style="margin-top:5px; font-weight:700;">2 Cores</p>
             </div>
-            <div class="card" onclick="openMod('ram')" style="display: flex; justify-content: space-between;">
-                <span>RAM</span> <b id="r-ram" style="color: var(--accent);">4 GB</b>
+            <div class="card" onclick="tg.showAlert('Настройка RAM...')">
+                <span class="section-title" style="margin:0; padding:0;">Оперативная память</span>
+                <p style="margin-top:5px; font-weight:700;">4 GB</p>
             </div>
-            
-            <div style="margin-top: auto; text-align: center;">
-                <p style="font-size: 11px; color: var(--text-dim);">Месячный план</p>
-                <p style="font-size: 36px; font-weight: 800; color: var(--accent); margin: 10px 0;" id="total-price">$6.00</p>
-                <button class="btn-action" onclick="tg.showConfirm('Списать $6.00 с баланса?')">Развернуть сейчас</button>
-            </div>
+            <button class="btn-main" style="margin-top: auto;" onclick="tg.showConfirm('Создать сервер за $7.50?')">Запустить</button>
         </div>
 
         <div id="v-pay" class="view">
             <h3>Пополнение баланса</h3>
-            <p style="font-size: 12px; color: var(--text-dim);">Выберите сумму или введите свою</p>
-            
-            <div class="pay-grid">
-                <div class="pay-opt" onclick="setSum(5)">$5</div>
-                <div class="pay-opt" onclick="setSum(10)">$10</div>
-                <div class="pay-opt" onclick="setSum(50)">$50</div>
+            <div class="section-title">Выберите сумму</div>
+            <div class="sum-grid">
+                <div class="sum-btn" onclick="selectSum(5)">$5</div>
+                <div class="sum-btn" onclick="selectSum(10)">$10</div>
+                <div class="sum-btn" onclick="selectSum(50)">$50</div>
             </div>
             
-            <input type="number" class="input-sum" id="custom-sum" placeholder="Другая сумма...">
-            
-            <div class="card" style="margin-bottom: 20px;">
-                <p style="font-size: 12px; margin-bottom: 10px;">Способ оплаты:</p>
-                <div style="display: flex; gap: 10px;">
-                    <i class="fab fa-cc-visa" style="font-size: 24px;"></i>
-                    <i class="fab fa-bitcoin" style="font-size: 24px;"></i>
-                    <i class="fas fa-exchange-alt" style="font-size: 24px;"></i>
+            <div class="input-area" onclick="document.getElementById('c-sum').focus()">
+                <span class="section-title" style="margin:0;">Своя сумма ($)</span>
+                <input type="number" id="c-sum" placeholder="0.00" oninput="updateActive(this.value)">
+            </div>
+
+            <div class="card" onclick="tg.showAlert('Переход к выбору платежной системы...')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Метод оплаты</span>
+                    <b style="color: var(--accent);">Криптовалюта / Карта</b>
                 </div>
             </div>
-            <button class="btn-action">Перейти к оплате</button>
+            
+            <button class="btn-main" onclick="processPay()">Продолжить</button>
         </div>
 
         <div id="v-info" class="view">
             <h3>Ознакомление</h3>
-            <div class="wiki-item">
+            <div class="card" onclick="tg.showAlert('VDS — это виртуальный сервер...')">
                 <h4>Что такое VDS?</h4>
-                <p>Это виртуальный выделенный сервер. Вы получаете часть физического сервера, которая работает только на вас, обеспечивая 100% стабильность.</p>
+                <p style="font-size: 12px; color: var(--text-dim); margin-top: 5px;">Узнайте больше о технологии облачных вычислений.</p>
             </div>
-            <div class="wiki-item">
-                <h4>Как пользоваться?</h4>
-                <p>После покупки вы получите IP-адрес, логин (root) и пароль. Используйте любой SSH-клиент для управления сервером.</p>
+            <div class="card" onclick="tg.showAlert('99.9% UpTime гарантирован.')">
+                <h4>Гарантии аптайма</h4>
+                <p style="font-size: 12px; color: var(--text-dim); margin-top: 5px;">Как мы обеспечиваем работу 24/7.</p>
             </div>
-            <div class="wiki-item">
-                <h4>Что такое Aura?</h4>
-                <p>Это экосистема облачных решений, оптимизированная под минимальный отклик и высокую безопасность данных.</p>
+            <div class="card" onclick="tg.openTelegramLink('https://t.me/aura_support')">
+                <h4 style="color: var(--accent);">Связаться с поддержкой</h4>
+                <p style="font-size: 12px; color: var(--text-dim); margin-top: 5px;">Мы ответим на любые вопросы.</p>
             </div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-btn active" onclick="switchView('home', 0)"><i class="fas fa-home"></i><span>Главная</span></div>
-        <div class="nav-btn" onclick="switchView('build', 1)"><i class="fas fa-server"></i><span>Купить</span></div>
-        <div class="nav-btn" onclick="switchView('pay', 2)"><i class="fas fa-wallet"></i><span>Пополнить</span></div>
-        <div class="nav-btn" onclick="switchView('info', 3)"><i class="fas fa-book"></i><span>Инфо</span></div>
+        <div class="nav-link active" onclick="switchView('home', 0)"><i class="fas fa-grid-2"></i><span>Дашборд</span></div>
+        <div class="nav-link" onclick="switchView('build', 1)"><i class="fas fa-plus-circle"></i><span>Создать</span></div>
+        <div class="nav-link" onclick="switchView('pay', 2)"><i class="fas fa-wallet"></i><span>Кошелек</span></div>
+        <div class="nav-link" onclick="switchView('info', 3)"><i class="fas fa-book-open"></i><span>Инфо</span></div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.setHeaderColor('#050607');
+        tg.setHeaderColor('#050608');
+
+        let balance = 0.00;
 
         function switchView(id, idx) {
             tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
             document.getElementById('v-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+            document.querySelectorAll('.nav-link')[idx].classList.add('active');
         }
 
-        function setSum(val) {
-            tg.HapticFeedback.impactOccurred('light');
-            document.getElementById('custom-sum').value = val;
-            document.querySelectorAll('.pay-opt').forEach(opt => {
-                opt.classList.remove('active');
-                if(opt.innerText === '$'+val) opt.classList.add('active');
-            });
-        }
-
-        // Базовая логика для модалок (заглушка)
-        function openMod(type) {
+        function selectSum(val) {
             tg.HapticFeedback.impactOccurred('medium');
-            tg.showPopup({
-                title: 'Выбор параметра',
-                message: 'Выберите желаемую конфигурацию ' + type,
-                buttons: [{text: 'Понятно', type: 'close'}]
+            document.getElementById('c-sum').value = val;
+            document.querySelectorAll('.sum-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText === '$'+val) b.classList.add('active');
             });
+        }
+
+        function updateActive(val) {
+            document.querySelectorAll('.sum-btn').forEach(b => b.classList.remove('active'));
+        }
+
+        function processPay() {
+            const sum = parseFloat(document.getElementById('c-sum').value);
+            if(!sum || sum <= 0) {
+                tg.showAlert("Введите корректную сумму");
+                return;
+            }
+            tg.showConfirm(`Пополнить баланс на $${sum.toFixed(2)}?`, (yes) => {
+                if(yes) {
+                    balance += sum;
+                    updateBalanceUI();
+                    tg.HapticFeedback.notificationOccurred('success');
+                    switchView('home', 0);
+                }
+            });
+        }
+
+        function buyVDS(name, price) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            if(balance < price) {
+                tg.showConfirm(`Недостаточно средств. Пополнить баланс на $${price}?`, (yes) => {
+                    if(yes) switchView('pay', 2);
+                });
+            } else {
+                tg.showConfirm(`Купить тариф "${name}" за $${price.toFixed(2)}?`, (yes) => {
+                    if(yes) {
+                        balance -= price;
+                        updateBalanceUI();
+                        tg.showAlert("Сервер успешно куплен и готовится к запуску!");
+                    }
+                });
+            }
+        }
+
+        function updateBalanceUI() {
+            const formatted = `$${balance.toFixed(2)}`;
+            document.getElementById('main-bal').innerText = formatted;
+            document.getElementById('header-bal').innerText = formatted;
         }
     </script>
 </body>
