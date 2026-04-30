@@ -3,135 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aura OS Utility</title>
+    <title>Aura OS Infinity</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #050506;
-            --card: #0e0f12;
+            /* Dark Theme (Default) */
+            --bg: #020203;
+            --surface: #0a0b0d;
+            --glass: rgba(255, 255, 255, 0.05);
             --accent: #3b82f6;
-            --border: #1f2937;
+            --border: rgba(255, 255, 255, 0.1);
             --text: #ffffff;
-            --text-dim: #94a3b8;
-            --green: #10b981;
-            --red: #ef4444;
+            --text-dim: #71717a;
+            --success: #10b981;
+            --nav-bg: rgba(2, 2, 3, 0.9);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        [data-theme="light"] {
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --glass: rgba(0, 0, 0, 0.03);
+            --accent: #2563eb;
+            --border: rgba(0, 0, 0, 0.1);
+            --text: #111827;
+            --text-dim: #6b7280;
+            --success: #059669;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; transition: background 0.3s, color 0.3s; }
         body {
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, "SF Pro Display", sans-serif;
             background: var(--bg); color: var(--text);
             height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        .container { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .container { flex: 1; padding: 16px; padding-top: calc(10px + env(safe-area-inset-top)); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
 
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        .bal-display { font-size: 24px; font-weight: 800; }
-        .lang-switch { background: var(--border); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        header { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: 6px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .header-actions { display: flex; gap: 8px; }
+        .icon-btn { background: var(--glass); border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; }
 
-        /* --- NODES --- */
-        .node-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-        .node-status { font-size: 10px; text-transform: uppercase; font-weight: 800; display: flex; align-items: center; gap: 5px; }
-        .status-on { color: var(--green); }
-        .status-off { color: var(--red); }
+        .card { 
+            background: var(--glass); border: 1px solid var(--border); border-radius: 24px; padding: 20px; 
+            backdrop-filter: blur(20px); cursor: pointer;
+        }
+        .card:active { transform: scale(0.98); }
 
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .btn-action { background: #1a1b20; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-        .btn-action:active { background: var(--accent); }
+        .section-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
 
-        /* --- CONSTRUCTOR --- */
-        .spec-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1a1b20; }
-        .spec-item span { color: var(--text-dim); font-size: 14px; }
-
-        /* --- NAV --- */
-        nav { background: #000; border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
-        .nav-item { flex: 1; text-align: center; opacity: 0.5; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #fff; text-decoration: none; }
-        .nav-item.active { opacity: 1; color: var(--accent); }
-        .nav-item i { font-size: 18px; display: block; margin-bottom: 4px; }
-
-        .btn-buy { background: var(--accent); color: #fff; border: none; padding: 16px; border-radius: 8px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; }
-
-        .view { display: none; flex-direction: column; gap: 16px; }
+        .view { display: none; flex-direction: column; gap: 16px; animation: slideUp 0.3s ease-out; }
         .view.active { display: flex; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        nav { background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; padding: 10px 0 calc(12px + env(safe-area-inset-bottom)); backdrop-filter: blur(20px); }
+        .n-link { flex: 1; display: flex; flex-direction: column; align-items: center; opacity: 0.4; color: var(--text); transition: 0.2s; cursor: pointer; }
+        .n-link.active { opacity: 1; color: var(--accent); }
+        .n-link i { font-size: 18px; margin-bottom: 4px; }
+        .n-link span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+
+        input[type="range"] { width: 100%; accent-color: var(--accent); margin: 10px 0; }
+        .btn-prime { background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 18px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <div>
-                <p style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Balance</p>
-                <div class="bal-display" id="bal-val">$0.00</div>
+            <div class="logo">AURA</div>
+            <div class="header-actions">
+                <div class="icon-btn" onclick="toggleTheme()"><i class="fas fa-moon" id="theme-icon"></i></div>
+                <div class="icon-btn" onclick="toggleLang()" id="lang-btn" style="font-size: 10px; font-weight: 900;">RU</div>
             </div>
-            <div class="lang-switch" onclick="toggleLang()" id="lang-btn">RU</div>
         </header>
 
-        <div id="v-nodes" class="view active">
-            <h3 style="font-size: 14px;" data-key="h_title">Active Instances</h3>
-            <div id="nodes-container"></div>
-            
-            <h3 style="font-size: 14px; margin-top: 10px;" data-key="h_market">Marketplace</h3>
-            <div class="node-card" onclick="buyNode('Eco Cloud', 0.01)">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>Eco Cloud</b>
-                    <span style="color:var(--green)">$0.01/hr</span>
+        <div id="v-home" class="view active">
+            <div class="card" onclick="switchView('pay', 2)">
+                <span class="section-label" data-key="h_bal">Balance</span>
+                <div style="font-size: 32px; font-weight: 900; margin-top: 4px;" id="disp-bal">$0.00</div>
+            </div>
+
+            <div class="section-label" data-key="h_nodes">Active Nodes</div>
+            <div id="nodes-list"></div>
+
+            <div class="section-label" data-key="h_market">Best Offers</div>
+            <div class="card" onclick="buyServer('CX11 Pro', 6.45, '1 vCPU / 2GB')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><h4>CX11 Pro</h4><p style="font-size:11px; color:var(--text-dim)">Intel Xeon • 2GB RAM</p></div>
+                    <b style="color:var(--accent)">$6.45<span style="font-size:9px; font-weight:normal">/mo</span></b>
                 </div>
-                <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">1 vCPU • 2GB RAM • 20GB SSD</p>
+            </div>
+            <div class="card" onclick="buyServer('CPX21 Ultra', 13.95, '3 vCPU / 4GB')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div><h4>CPX21 Ultra</h4><p style="font-size:11px; color:var(--text-dim)">AMD EPYC • 4GB RAM</p></div>
+                    <b style="color:var(--accent)">$13.95<span style="font-size:9px; font-weight:normal">/mo</span></b>
+                </div>
             </div>
         </div>
 
         <div id="v-build" class="view">
-            <h3 data-key="b_title">Custom Build</h3>
-            <div class="node-card">
-                <div class="spec-item"><span>vCPU</span><b>2 Cores</b></div>
-                <div class="spec-item"><span>RAM</span><b>4 GB</b></div>
-                <div class="spec-item"><span>NVMe</span><b>40 GB</b></div>
+            <h3 data-key="b_title">Cloud Builder</h3>
+            <div class="card">
+                <div class="section-label">vCPU: <span id="cpu-val">2</span></div>
+                <input type="range" min="1" max="16" value="2" id="cpu-range" oninput="updatePrice()">
+                
+                <div class="section-label">RAM (GB): <span id="ram-val">4</span></div>
+                <input type="range" min="1" max="64" value="4" id="ram-range" oninput="updatePrice()">
             </div>
-            <div style="text-align:center; padding:20px;">
-                <p style="color:var(--text-dim); font-size:12px;">Estimated monthly cost</p>
-                <div style="font-size:32px; font-weight:900;">$9.50</div>
-                <button class="btn-buy" onclick="buyNode('Custom VDS', 0.02)">Deploy Now</button>
+            <div style="text-align:center; padding:10px;">
+                <span data-key="b_total">Est. Price:</span>
+                <div style="font-size:36px; font-weight:900; color:var(--accent)" id="total-price">$0.00</div>
+                <button class="btn-prime" style="width:100%; margin-top:15px;" onclick="deployCustom()" data-key="b_btn">Deploy Instance</button>
             </div>
         </div>
 
-        <div id="v-help" class="view">
-            <h3 data-key="s_title">Support Center</h3>
-            <div class="node-card">
-                <p style="font-size:13px; margin-bottom:10px;">Need help with your server?</p>
-                <button class="btn-buy" onclick="tg.openTelegramLink('https://t.me/your_support')">Open Ticket</button>
+        <div id="v-info" class="view">
+            <h3 data-key="i_title">Information Center</h3>
+            <div class="card">
+                <h4 style="color:var(--accent)">Aura Cloud Wiki</h4>
+                <p style="font-size:12px; color:var(--text-dim); margin-top:8px;" data-key="i_wiki">We provide enterprise-grade infrastructure with 99.9% uptime. Prices are scaled 1.5x for managed services.</p>
             </div>
-            <div class="node-card">
-                <h4 style="font-size:12px; color:var(--accent);">API Documentation</h4>
-                <p style="font-size:11px; color:var(--text-dim); margin-top:5px;">Check our SDK for automation and management.</p>
+            <div class="card" onclick="tg.openTelegramLink('https://t.me/support')">
+                <h4 data-key="i_supp">Contact Support</h4>
+                <p style="font-size:11px; color:var(--text-dim); margin-top:4px;">Available 24/7 for technical inquiries.</p>
             </div>
+        </div>
+        
+        <div id="v-pay" class="view">
+            <h3 data-key="p_title">Finance</h3>
+            <input type="number" id="pay-amt" placeholder="10.00" style="background:var(--surface); border:1px solid var(--border); padding:20px; border-radius:18px; color:var(--text); font-size:20px; text-align:center;">
+            <button class="btn-prime" onclick="addFunds()" data-key="p_btn">Add Funds</button>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchTab('nodes', 0)"><i class="fas fa-server"></i><span data-key="n_n">Nodes</span></div>
-        <div class="nav-item" onclick="switchTab('build', 1)"><i class="fas fa-plus"></i><span data-key="n_b">Build</span></div>
-        <div class="nav-item" onclick="switchTab('help', 2)"><i class="fas fa-headset"></i><span data-key="n_s">Help</span></div>
+        <div class="n-link active" onclick="switchView('home', 0)"><i class="fas fa-server"></i><span data-key="n_h">Nodes</span></div>
+        <div class="n-link" onclick="switchView('build', 1)"><i class="fas fa-tools"></i><span data-key="n_b">Build</span></div>
+        <div class="n-link" onclick="switchView('info', 2)"><i class="fas fa-info-circle"></i><span data-key="n_i">Wiki</span></div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         let balance = 0.00;
-        let nodes = [];
+        let servers = [];
         let lang = 'ru';
+        let theme = 'dark';
 
         const i18n = {
-            ru: { h_title: "Активные ноды", h_market: "Маркетплейс", b_title: "Конструктор", s_title: "Поддержка", n_n: "Ноды", n_b: "Создать", n_s: "Помощь" },
-            en: { h_title: "Active Nodes", h_market: "Marketplace", b_title: "Constructor", s_title: "Support", n_n: "Nodes", n_b: "Build", n_s: "Support" }
+            ru: {
+                h_bal: "Баланс", h_nodes: "Активные Узлы", h_market: "Лучшие тарифы",
+                b_title: "Конструктор Облака", b_total: "Итоговая цена:", b_btn: "Запустить Узел",
+                i_title: "Инфо-центр", i_wiki: "Мы предоставляем инфраструктуру корпоративного уровня. Цены включают 1.5x коэффициент за управление.", i_supp: "Поддержка 24/7",
+                p_title: "Пополнение", p_btn: "Оплатить", n_h: "Ноды", n_b: "Сборка", n_i: "Вики", empty: "Узлов нет"
+            },
+            en: {
+                h_bal: "Balance", h_nodes: "Active Nodes", h_market: "Best Offers",
+                b_title: "Cloud Builder", b_total: "Est. Price:", b_btn: "Deploy Instance",
+                i_title: "Info Center", i_wiki: "We provide enterprise infrastructure. Prices include 1.5x management fee.", i_supp: "24/7 Support",
+                p_title: "Recharge", p_btn: "Pay Now", n_h: "Nodes", n_b: "Build", n_i: "Wiki", empty: "No nodes"
+            }
         };
 
-        function switchTab(id, idx) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('v-'+id).classList.add('active');
-            document.querySelectorAll('.nav-item')[idx].classList.add('active');
-            tg.HapticFeedback.selectionChanged();
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function toggleLang() {
@@ -140,60 +180,61 @@
             updateUI();
         }
 
-        function buyNode(name, hrPrice) {
-            tg.showConfirm(`Start ${name} for $${hrPrice}/hour?`, (yes) => {
-                if(yes) {
-                    const node = { id: Date.now(), name, ip: `185.12.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`, status: 'ON' };
-                    nodes.push(node);
-                    updateUI();
-                    switchTab('nodes', 0);
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-            });
+        function updatePrice() {
+            const cpu = document.getElementById('cpu-range').value;
+            const ram = document.getElementById('ram-range').value;
+            document.getElementById('cpu-val').innerText = cpu;
+            document.getElementById('ram-val').innerText = ram;
+            // Логика: (CPU * 2.5 + RAM * 1.2) * 1.5 (наценка)
+            const base = (cpu * 2.5 + ram * 1.2);
+            const total = (base * 1.5).toFixed(2);
+            document.getElementById('total-price').innerText = `$${total}`;
+            return total;
         }
 
-        function control(id, action) {
-            const node = nodes.find(n => n.id === id);
-            if(node) {
-                node.status = action === 'start' ? 'ON' : 'OFF';
-                updateUI();
-                tg.HapticFeedback.impactOccurred('medium');
-            }
+        function switchView(id, idx) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('v-'+id).classList.add('active');
+            document.querySelectorAll('.n-link')[idx].classList.add('active');
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        function addFunds() {
+            const val = parseFloat(document.getElementById('pay-amt').value);
+            if(val > 0) { balance += val; updateUI(); switchView('home', 0); tg.HapticFeedback.notificationOccurred('success'); }
+        }
+
+        function buyServer(name, price, specs) {
+            if(balance < price) { tg.showAlert("Low balance!"); return; }
+            balance -= price;
+            servers.push({ name, specs, ip: `95.213.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}` });
+            updateUI();
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function deployCustom() {
+            const price = parseFloat(updatePrice());
+            buyServer('Custom Instance', price, `${document.getElementById('cpu-val').innerText} vCPU / ${document.getElementById('ram-val').innerText}GB`);
         }
 
         function updateUI() {
-            document.getElementById('bal-val').innerText = `$${balance.toFixed(2)}`;
-            const container = document.getElementById('nodes-container');
-            
-            if(nodes.length === 0) {
-                container.innerHTML = `<p style="text-align:center; padding:20px; color:var(--text-dim); font-size:12px;">${lang === 'ru' ? 'Нет активных серверов' : 'No active servers'}</p>`;
-            } else {
-                container.innerHTML = nodes.map(n => `
-                    <div class="node-card" style="margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <h4 style="font-size:14px;">${n.name}</h4>
-                                <code style="font-size:11px; color:var(--accent);">${n.ip}</code>
-                            </div>
-                            <div class="node-status ${n.status === 'ON' ? 'status-on' : 'status-off'}">
-                                <span>● ${n.status}</span>
-                            </div>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn-action" onclick="control(${n.id}, 'start')">START</button>
-                            <button class="btn-action" onclick="control(${n.id}, 'stop')">STOP</button>
-                            <button class="btn-action" onclick="tg.showAlert('Reinstalling OS...')">REINSTALL</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
+            document.getElementById('disp-bal').innerText = `$${balance.toFixed(2)}`;
             document.querySelectorAll('[data-key]').forEach(el => {
                 const key = el.getAttribute('data-key');
-                el.innerText = i18n[lang][key];
+                if(i18n[lang][key]) el.innerText = i18n[lang][key];
             });
+            const list = document.getElementById('nodes-list');
+            list.innerHTML = servers.length === 0 ? `<p style="text-align:center;color:var(--text-dim);font-size:12px;">${i18n[lang].empty}</p>` : 
+                servers.map(s => `<div class="card" style="margin-bottom:10px; border-left:3px solid var(--accent);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><h4>${s.name}</h4><code style="color:var(--accent); font-size:11px;">${s.ip}</code></div>
+                        <span style="color:var(--success); font-size:9px; font-weight:800;">● ONLINE</span>
+                    </div>
+                </div>`).join('');
         }
 
+        updatePrice();
         updateUI();
     </script>
 </body>
